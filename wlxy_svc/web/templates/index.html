@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>成都职业培训网络学院 自动化控制台</title>
+<style>
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --c-bg:#f0f2f7; --c-surface:#fff; --c-surface-2:#f4f6fb; --c-surface-3:#eaecf4;
+  --c-border:#e2e5ef; --c-border-strong:#c8cedf;
+  --c-text:#1a2033; --c-text-soft:#55617c; --c-text-muted:#8891a6;
+  --c-primary:#3659f0; --c-primary-hover:#2546e0;
+  --c-primary-soft:#eaedff; --c-primary-dim:rgba(54,89,240,.12);
+  --c-success:#15a348; --c-success-soft:#d9f7e6;
+  --c-warning:#d97706; --c-warning-soft:#fef3c7;
+  --c-danger:#dc2626; --c-danger-soft:#fee2e2;
+  --c-info:#0891b2; --c-info-soft:#ddf4fb;
+  --c-neutral:#6b7280; --c-neutral-soft:#f1f2f5;
+  --c-logo-grad:linear-gradient(135deg,#3659f0 0%,#7c3aed 100%);
+  --r-xs:4px; --r-sm:6px; --r:10px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --shadow-xs:0 1px 2px rgba(0,0,0,.06);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.07),0 2px 8px rgba(0,0,0,.04);
+  --shadow:0 2px 8px rgba(0,0,0,.08),0 4px 20px rgba(0,0,0,.05);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.10),0 16px 48px rgba(0,0,0,.06);
+  --shadow-primary:0 4px 14px rgba(54,89,240,.28);
+  --dur-fast:110ms; --dur:170ms; --dur-slow:260ms;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-out:cubic-bezier(0,.7,.3,1);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,"JetBrains Mono","Cascadia Code",Consolas,"Liberation Mono",Menlo,monospace;
+  --header-h:60px; --container:1320px;
+}
+[data-theme="dark"],@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --c-bg:#0d0f16; --c-surface:#161921; --c-surface-2:#1c1f2c; --c-surface-3:#21263a;
+  --c-border:#252b3d; --c-border-strong:#333a52;
+  --c-text:#e8eaf2; --c-text-soft:#a0a9be; --c-text-muted:#6a7290;
+  --c-primary:#6f8fff; --c-primary-hover:#849aff;
+  --c-primary-soft:#1a2150; --c-primary-dim:rgba(111,143,255,.15);
+  --c-success-soft:#0e2a1a; --c-warning-soft:#2e1f05;
+  --c-danger-soft:#2e0d0d; --c-info-soft:#052433; --c-neutral-soft:#1e222e;
+  --c-logo-grad:linear-gradient(135deg,#5578ff 0%,#9d5cf7 100%);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.3),0 2px 8px rgba(0,0,0,.2);
+  --shadow:0 2px 8px rgba(0,0,0,.35),0 4px 20px rgba(0,0,0,.22);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.45),0 16px 48px rgba(0,0,0,.28);
+  --shadow-primary:0 4px 14px rgba(111,143,255,.30);
+}}
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);font-size:14px;line-height:1.55;color:var(--c-text);background:var(--c-bg);-webkit-font-smoothing:antialiased}
+h2{font-size:15px;font-weight:600} h3{font-size:13px;font-weight:600;letter-spacing:.3px}
+small{font-size:12px;color:var(--c-text-muted)}
+code{font-family:var(--font-mono);font-size:12px;background:var(--c-surface-2);border-radius:var(--r-xs);padding:1px 4px}
+a{color:var(--c-primary);text-decoration:none}
+/* ── Button ────────────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:13.5px;font-weight:500;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:background var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast),transform var(--dur-fast);white-space:nowrap;font-family:inherit}
+.btn:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
+.btn[aria-busy="true"]{cursor:progress;pointer-events:none}
+.btn-primary{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
+.btn-primary:hover{background:var(--c-primary-hover);border-color:var(--c-primary-hover);box-shadow:var(--shadow-primary)}
+.btn-outline{background:transparent;border-color:var(--c-border-strong);color:var(--c-text-soft)}
+.btn-outline:hover{background:var(--c-surface-2);border-color:var(--c-primary);color:var(--c-primary)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--c-text-soft)}
+.btn-ghost:hover{background:var(--c-surface-2)}
+.btn-danger{background:var(--c-danger);color:#fff;border-color:var(--c-danger)}
+.btn-danger:hover{opacity:.9}
+.btn-sm{padding:5px 10px;font-size:12.5px}
+.btn-icon{padding:8px;aspect-ratio:1}
+.btn svg.icon{width:14px;height:14px;flex-shrink:0}
+/* ── Pill ───────────────────────────────────────────────────────────────────── */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:var(--r-pill);font-size:12px;font-weight:500;white-space:nowrap}
+.pill .dot{width:6px;height:6px;border-radius:999px;flex-shrink:0}
+.pill[data-tone="queued"]{background:var(--c-neutral-soft);color:var(--c-neutral)} .pill[data-tone="queued"] .dot{background:#9ca3af}
+.pill[data-tone="running"]{background:var(--c-primary-soft);color:var(--c-primary)} .pill[data-tone="running"] .dot{background:var(--c-primary);animation:pulse 1.8s ease infinite}
+.pill[data-tone="waiting_apply"]{background:var(--c-warning-soft);color:var(--c-warning)} .pill[data-tone="waiting_apply"] .dot{background:var(--c-warning)}
+.pill[data-tone="completed"]{background:var(--c-success-soft);color:var(--c-success)} .pill[data-tone="completed"] .dot{background:var(--c-success)}
+.pill[data-tone="failed"]{background:var(--c-danger-soft);color:var(--c-danger)} .pill[data-tone="failed"] .dot{background:var(--c-danger)}
+.pill[data-tone="paused"]{background:var(--c-neutral-soft);color:var(--c-text-muted)} .pill[data-tone="paused"] .dot{background:var(--c-text-muted)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+/* ── Spinner ────────────────────────────────────────────────────────────────── */
+.spinner{width:14px;height:14px;border-radius:999px;border:2px solid var(--c-border);border-top-color:var(--c-primary);animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── Stat Tiles ─────────────────────────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+.stat-tile{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);padding:18px 20px;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.stat-tile:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--c-border-strong)}
+.stat-tile[data-active="true"]{border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-dim)}
+.stat-tile.no-filter{cursor:default;pointer-events:none}
+.tile-head{display:flex;align-items:flex-start;justify-content:space-between}
+.tile-label{font-size:12px;font-weight:500;letter-spacing:.4px;color:var(--c-text-muted)}
+.tile-icon{color:var(--c-text-muted)}
+.tile-value{margin-top:10px;font-size:28px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums;color:var(--c-text)}
+.tile-sub{font-size:12px;color:var(--c-text-muted);margin-top:2px}
+/* ── Panel ──────────────────────────────────────────────────────────────────── */
+.panel{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.panel-header{padding:16px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--c-border);cursor:pointer;user-select:none}
+.panel-header h2{flex:1}
+.panel-header .chevron{transition:transform var(--dur) var(--ease);color:var(--c-text-muted)}
+.panel[data-open="false"] .panel-header{border-bottom-color:transparent}
+.panel[data-open="false"] .panel-header .chevron{transform:rotate(-90deg)}
+.panel[data-open="false"] .panel-body{display:none}
+.panel-body{padding:20px}
+.panel-badge{background:var(--c-surface-2);color:var(--c-text-muted);border-radius:var(--r-pill);padding:1px 8px;font-size:11.5px;font-weight:500}
+/* ── Form ───────────────────────────────────────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.field{display:flex;flex-direction:column}
+.field-label{display:block;margin-bottom:5px;font-size:12.5px;font-weight:500;color:var(--c-text-soft);letter-spacing:.2px}
+.req{color:var(--c-danger)}
+.input{width:100%;padding:8px 11px;border:1.5px solid var(--c-border);border-radius:var(--r-sm);background:var(--c-surface-2);font-size:13.5px;color:var(--c-text);transition:border-color var(--dur-fast) var(--ease),box-shadow var(--dur-fast) var(--ease);outline:none;font-family:inherit}
+.input:focus{border-color:var(--c-primary);background:var(--c-surface);box-shadow:0 0 0 3px var(--c-primary-dim)}
+.input::placeholder{color:var(--c-text-muted)}
+textarea.input.credential-textarea{min-height:72px;resize:vertical;font-family:var(--font-mono);font-size:13px;line-height:1.5}
+.field-credential-combined{display:none}
+.field-hint{display:block;margin-top:5px;font-size:12px;color:var(--c-text-muted);line-height:1.45}
+.input:focus-visible{outline:none}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+kbd{border:1px solid var(--c-border-strong);border-radius:4px;padding:1px 6px;font-family:var(--font-mono);font-size:11px;background:var(--c-surface-2);color:var(--c-text-muted)}
+/* ── Upload Zone ────────────────────────────────────────────────────────────── */
+.upload-zone{border:2px dashed var(--c-border-strong);border-radius:var(--r-md);padding:20px;text-align:center;cursor:pointer;transition:border-color var(--dur-fast),background var(--dur-fast)}
+.upload-zone.drag-over{border-color:var(--c-primary);background:var(--c-primary-soft)}
+.upload-zone p{font-size:13px;color:var(--c-text-muted);margin-top:6px}
+/* ── Year Pills (B型) ───────────────────────────────────────────────────────── */
+.year-pills{display:flex;flex-wrap:wrap;gap:8px}
+.year-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1.5px solid var(--c-border);border-radius:var(--r-pill);font-size:13px;cursor:pointer;transition:border-color var(--dur-fast),background var(--dur-fast),color var(--dur-fast)}
+.year-pill input{display:none}
+.year-pill:has(input:checked){border-color:var(--c-primary);background:var(--c-primary-soft);color:var(--c-primary);font-weight:500}
+/* ── Toolbar ────────────────────────────────────────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--c-border)}
+.search-wrap{position:relative;flex:1;min-width:160px;max-width:280px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--c-text-muted);pointer-events:none}
+.search-wrap .input{padding-left:34px}
+.segmented{display:inline-flex;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:var(--r-sm);padding:3px;gap:2px}
+.segmented button{padding:4px 11px;border-radius:calc(var(--r-sm) - 2px);font-size:12.5px;border:none;cursor:pointer;background:transparent;color:var(--c-text-soft);transition:background var(--dur-fast),color var(--dur-fast);font-family:inherit}
+.segmented button[aria-pressed="true"]{background:var(--c-surface);color:var(--c-text);box-shadow:var(--shadow-xs)}
+.toolbar-count{font-size:12px;color:var(--c-text-muted);margin-left:auto;white-space:nowrap}
+/* ── Table ──────────────────────────────────────────────────────────────────── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{padding:10px 14px;font-size:11.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--c-text-muted);background:var(--c-surface-2);border-bottom:1px solid var(--c-border);white-space:nowrap;text-align:left}
+tbody tr{border-bottom:1px solid var(--c-border);transition:background var(--dur-fast)}
+tbody tr:hover{background:var(--c-surface-2)}
+tbody tr.is-failed{background:rgba(220,38,38,.03)}
+tbody tr.is-failed:hover{background:rgba(220,38,38,.06)}
+tbody td{padding:12px 14px;font-size:13.5px;vertical-align:middle;text-align:left}
+.td-name{width:88px;font-weight:600;cursor:pointer;color:var(--c-primary)}
+.td-name:hover{text-decoration:underline}
+.td-user{width:152px;font-family:var(--font-mono);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-subjects{width:auto;min-width:160px;max-width:220px}
+.td-years{width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-progress{width:108px}
+.progress-bar{height:6px;background:var(--c-surface-2);border-radius:var(--r-pill);overflow:hidden;margin-top:4px}
+.progress-bar span{display:block;height:100%;background:var(--c-primary);border-radius:var(--r-pill)}
+.year-group{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--c-border)}
+.year-group h3{font-size:13px;margin-bottom:8px;color:var(--c-text-soft)}
+.td-status{width:100px}
+.td-msg{width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--c-text-soft);font-size:13px}
+.td-actions{width:200px}
+.actions-group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:var(--r-xs);padding:2px 7px;font-size:11.5px;color:var(--c-text-soft)}
+/* ── Mobile Card ────────────────────────────────────────────────────────────── */
+.card-list{display:none;flex-direction:column;gap:0}
+.mobile-card{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.mobile-card:last-child{border-bottom:none}
+.mc-top{display:flex;align-items:center;justify-content:space-between}
+.mc-name{font-weight:600;font-size:14px;cursor:pointer;color:var(--c-primary)}
+.mc-user{font-family:var(--font-mono);font-size:12px;color:var(--c-text-muted)}
+.mc-msg{font-size:12px;color:var(--c-text-soft);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mc-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* ── Empty / Skeleton ───────────────────────────────────────────────────────── */
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 24px;color:var(--c-text-muted)}
+.empty-title{font-size:14px;font-weight:500;color:var(--c-text-soft)}
+.empty-sub{font-size:12.5px}
+.skeleton{border-radius:var(--r-sm);background:var(--c-surface-3);position:relative;overflow:hidden;display:inline-block}
+.skeleton::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,var(--c-border) 40%,transparent 80%);animation:shimmer 1.5s linear infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.skeleton-row{display:flex;gap:14px;padding:12px 14px;border-bottom:1px solid var(--c-border)}
+.skeleton-row .skeleton{height:14px}
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
+#toastStack{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column-reverse;gap:10px;z-index:200;pointer-events:none}
+.toast{width:320px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);box-shadow:var(--shadow);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;pointer-events:all;animation:toastIn .12s ease both}
+.toast .t-accent{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:var(--r-md) 0 0 var(--r-md)}
+.toast{position:relative;overflow:hidden}
+.toast[data-tone="success"] .t-accent{background:var(--c-success)}
+.toast[data-tone="warning"] .t-accent{background:var(--c-warning)}
+.toast[data-tone="danger"] .t-accent{background:var(--c-danger)}
+.toast[data-tone="info"] .t-accent{background:var(--c-info)}
+.toast .t-msg{flex:1;font-size:13.5px;padding-left:6px}
+.toast .t-close{flex-shrink:0;cursor:pointer;color:var(--c-text-muted);background:none;border:none;padding:2px;line-height:1}
+.toast .t-close:hover{color:var(--c-text)}
+@keyframes toastIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ── Modal ──────────────────────────────────────────────────────────────────── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,12,20,.48);backdrop-filter:blur(3px);z-index:150;display:flex;align-items:center;justify-content:center;animation:fadeIn .16s ease}
+.modal{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:min(460px,calc(100vw - 32px));max-height:85vh;overflow-y:auto;animation:slideUp .22s var(--ease-out)}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-size:15px}
+.modal-body{padding:20px;font-size:14px;line-height:1.6}
+.modal-foot{padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--c-border)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+/* ── Pagination ─────────────────────────────────────────────────────────────── */
+.list-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--c-border);background:var(--c-surface-2)}
+.list-pagination-info{font-size:12px;color:var(--c-text-muted)}
+.list-pagination-actions{display:flex;align-items:center;gap:8px}
+.list-pagination .input{width:auto;min-width:72px;padding:5px 8px;font-size:12px}
+.list-pagination .btn{min-width:72px}
+/* ── Drawer ─────────────────────────────────────────────────────────────────── */
+#drawerMount{position:fixed;inset:0;z-index:140;pointer-events:none}
+#drawerMount:empty{display:none}
+.drawer-backdrop{position:absolute;inset:0;background:rgba(10,12,20,.36);backdrop-filter:blur(2px);pointer-events:auto}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(580px,100vw);background:var(--c-surface);border-left:1px solid var(--c-border);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:slideInRight var(--dur-slow) var(--ease-out);z-index:1;pointer-events:auto}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;justify-content:space-between}
+.drawer-head h2{font-size:15px;font-weight:600}
+.drawer-body{flex:1;overflow-y:auto;padding:20px}
+/* ── Tabs ───────────────────────────────────────────────────────────────────── */
+.tabs-nav{display:flex;border-bottom:1px solid var(--c-border);gap:0;margin-bottom:18px}
+.tabs-nav button{padding:9px 16px;font-size:13px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--c-text-muted);border-bottom:2px solid transparent;transition:color var(--dur-fast),border-color var(--dur-fast);margin-bottom:-1px;font-family:inherit}
+.tabs-nav button[aria-selected="true"]{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.tabs-nav button:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px}
+.tab-pane{display:none} .tab-pane.active{display:block}
+/* ── KV ─────────────────────────────────────────────────────────────────────── */
+.kv{display:grid;grid-template-columns:110px 1fr;gap:8px 14px;font-size:13px}
+.kv dt{color:var(--c-text-muted);font-weight:500;padding-top:1px}
+.kv dd{color:var(--c-text);word-break:break-word}
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.app-header{height:var(--header-h);position:sticky;top:0;z-index:100;background:rgba(255,255,255,.88);backdrop-filter:blur(12px) saturate(180%);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:12px;padding:0 20px}
+[data-theme="dark"] .app-header{background:rgba(22,25,33,.88)}
+.logo-block{width:36px;height:36px;border-radius:9px;background:var(--c-logo-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0}
+.site-name{font-size:15px;font-weight:700;color:var(--c-text)}
+.header-spacer{flex:1}
+.ctrl-group{display:flex;align-items:center;gap:6px;padding-right:12px;border-right:1px solid var(--c-border)}
+.concurrency-label{font-size:13px;color:var(--c-text-muted)}
+.concurrency-input{width:56px;padding:4px 6px;border:1.5px solid var(--c-border);border-radius:var(--r-sm);background:var(--c-surface-2);font-size:13px;color:var(--c-text);text-align:center;outline:none;font-family:inherit}
+.concurrency-input:focus{border-color:var(--c-primary);box-shadow:0 0 0 3px var(--c-primary-dim)}
+.header-actions{display:flex;align-items:center;gap:8px}
+#syncInfo{font-size:12px;color:var(--c-text-muted);font-family:var(--font-mono);display:flex;align-items:center;gap:6px}
+/* ── Container ──────────────────────────────────────────────────────────────── */
+.container{max-width:var(--container);margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+/* ── History / apply rows ───────────────────────────────────────────────────── */
+.run-item{padding:10px 0;border-bottom:1px solid var(--c-border);font-size:13px}
+.run-item:last-child{border-bottom:none}
+.run-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.run-time{font-size:11.5px;color:var(--c-text-muted);font-family:var(--font-mono)}
+.run-summary{color:var(--c-text-soft);font-size:12.5px;margin-top:4px}
+details summary{cursor:pointer;font-size:12px;color:var(--c-text-muted);margin-top:4px;user-select:none}
+details pre{margin-top:6px;font-size:11.5px;font-family:var(--font-mono);background:var(--c-surface-2);padding:10px;border-radius:var(--r-sm);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;color:var(--c-text-soft)}
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media(max-width:640px){
+  .container{padding:14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .table-wrap table{display:none}
+  .card-list{display:flex}
+  .app-header .site-name,.app-header .ctrl-group{display:none}
+  #syncInfo{display:none}
+}
+@media(max-width:480px){
+  .form-grid{grid-template-columns:1fr}
+  .upload-zone{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="logo-block">网</div>
+  <span class="site-name">成都职业培训网络学院</span>
+  <span id="schedBadge" class="pill" data-tone="running" style="gap:5px"><span class="dot"></span><span id="schedText">调度中</span></span>
+  <div id="syncInfo"><span id="loadingDot" class="spinner" style="display:none"></span><span id="lastSync">--:--:--</span></div>
+  <div class="header-spacer"></div>
+  <div class="ctrl-group">
+    <span class="concurrency-label">并发</span>
+    <input class="concurrency-input" id="concurrencyInput" type="number" min="1" max="400" value="400" title="最大并发账号数（1–400）">
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline btn-sm" id="btnPause" title="暂停调度">
+      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="2" width="3" height="12" rx="1"/><rect x="9" y="2" width="3" height="12" rx="1"/></svg>暂停
+    </button>
+    <button class="btn btn-outline btn-sm" id="btnResume" style="display:none" title="恢复调度">
+      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polygon points="4,2 14,8 4,14"/></svg>恢复
+    </button>
+    <button class="btn btn-outline btn-sm" id="btnTemplate" title="下载账号模板">
+      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3a1 1 0 001 1h10a1 1 0 001-1v-3M8 2v8M5 7l3 3 3-3"/></svg>模板
+    </button>
+    <button class="btn btn-outline btn-sm" id="btnExport" title="导出账号数据">
+      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M5 8h6M5 11h4"/></svg>导出
+    </button>
+    <button class="btn btn-ghost btn-icon" id="btnTheme" title="切换主题">
+      <svg id="themeIcon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" width="16" height="16"><circle cx="8" cy="8" r="3.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.05 1.05M11.85 11.85l1.05 1.05M3.1 12.9l1.05-1.05M11.85 4.15l1.05-1.05"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ── Stats ──────────────────────────────────────────────────────────── -->
+  <section class="stats-grid" id="statsGrid">
+    <div class="stat-tile" data-filter="" data-active="true" onclick="filterByStatus('')">
+      <div class="tile-head"><span class="tile-label">总计</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      </div>
+      <div class="tile-value" id="tTotal">0</div>
+    </div>
+    <div class="stat-tile" data-filter="queued" onclick="filterByStatus('queued')">
+      <div class="tile-head"><span class="tile-label">排队</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+      </div>
+      <div class="tile-value" id="tQueued">0</div>
+    </div>
+    <div class="stat-tile" data-filter="running" onclick="filterByStatus('running')">
+      <div class="tile-head"><span class="tile-label">进行中</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><polygon points="6.5,5 11.5,8 6.5,11"/></svg>
+      </div>
+      <div class="tile-value" id="tRunning">0</div>
+    </div>
+    <div class="stat-tile" id="tileWaitApply" data-filter="waiting_apply" onclick="filterByStatus('waiting_apply')">
+      <div class="tile-head"><span class="tile-label">等待申请</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11V4a1 1 0 011-1h10a1 1 0 011 1v7"/><path d="M1 11h14M6 14l2-3 2 3"/></svg>
+      </div>
+      <div class="tile-value" id="tWaiting">0</div>
+    </div>
+    <div class="stat-tile" data-filter="completed" onclick="filterByStatus('completed')">
+      <div class="tile-head"><span class="tile-label">已完成</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5 8l2 2 4-4"/></svg>
+      </div>
+      <div class="tile-value" id="tCompleted">0</div>
+    </div>
+    <div class="stat-tile" data-filter="failed" onclick="filterByStatus('failed')">
+      <div class="tile-head"><span class="tile-label">失败</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M10 6L6 10M6 6l4 4"/></svg>
+      </div>
+      <div class="tile-value" id="tFailed">0</div>
+    </div>
+    <div class="stat-tile no-filter">
+      <div class="tile-head"><span class="tile-label">活跃 Worker</span>
+        <svg class="tile-icon" viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.5 3h3l-2.5 2 1 3L8 8.5 5 10l1-3-2.5-2h3z"/></svg>
+      </div>
+      <div class="tile-value" id="tWorkers">0</div>
+    </div>
+  </section>
+
+  <!-- ── Add Panel ──────────────────────────────────────────────────────── -->
+  <section class="panel" id="addPanel" data-open="true">
+    <div class="panel-header" onclick="togglePanel('addPanel')">
+      <h2>添加账号</h2>
+      <svg class="chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+    </div>
+    <div class="panel-body">
+      <form id="addForm" onsubmit="submitAddForm(event)">
+        <div class="form-grid" id="addFormA">
+          <div class="field field-credential-combined" id="fCredentialWrapA" style="grid-column:1/-1">
+            <label class="field-label" for="fCredentialA">账号密码 <span class="req">*</span></label>
+            <textarea class="input credential-textarea" id="fCredentialA" rows="2" placeholder="粘贴一行或两行，如：zhangsan mima123&#10;或：账号：zhangsan  密码：mima123" autocomplete="off"></textarea>
+            <span class="field-hint">支持：账号/密码、登录名/口令、手机号、帐号/帐户、是/为/等号/括号、【标签】、多行、账号|user|密码|pass 等格式</span>
+          </div>
+          <div class="field" id="fNameWrapA">
+            <label class="field-label" for="fName">姓名 <span class="req">*</span></label>
+            <input class="input" id="fName" type="text" placeholder="真实姓名" autocomplete="off">
+          </div>
+          <div class="field field-credential-split" id="fUserFieldA">
+            <label class="field-label" for="fUser">账号 <span class="req">*</span></label>
+            <input class="input" id="fUser" type="text" placeholder="登录账号" autocomplete="off">
+          </div>
+          <div class="field field-credential-split" id="fPassWrapA">
+            <label class="field-label" for="fPass">密码 <span class="req">*</span></label>
+            <input class="input" id="fPass" type="password" placeholder="登录密码" autocomplete="off">
+          </div>
+<div class="field">
+            <label class="field-label" for="fRemark">备注</label>
+            <input class="input" id="fRemark" type="text" placeholder="可选备注">
+          </div>
+        </div>
+        <div class="form-grid" id="addFormB" style="display:none">
+          <div class="field field-credential-combined" id="fCredentialWrapB" style="grid-column:1/-1">
+            <label class="field-label" for="fCredentialB">账号密码 <span class="req">*</span></label>
+            <textarea class="input credential-textarea" id="fCredentialB" rows="2" placeholder="粘贴一行或两行，如：zhangsan mima123&#10;或：账号：zhangsan  密码：mima123" autocomplete="off"></textarea>
+            <span class="field-hint">支持：账号/密码、登录名/口令、手机号、帐号/帐户、是/为/等号/括号、【标签】、多行、账号|user|密码|pass 等格式</span>
+          </div>
+          <div class="field field-credential-split" id="fUserWrapB">
+            <label class="field-label" for="fUserB">账号 <span class="req">*</span></label>
+            <input class="input" id="fUserB" type="text" placeholder="登录账号" autocomplete="off">
+          </div>
+          <div class="field field-credential-split" id="fPassWrapB">
+            <label class="field-label" for="fPassB">密码 <span class="req">*</span></label>
+            <input class="input" id="fPassB" type="password" placeholder="登录密码" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="field-label" for="fRemarkB">备注</label>
+            <input class="input" id="fRemarkB" type="text" placeholder="可选备注">
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label class="field-label">目标年度 <span class="req">*</span><span style="font-weight:400;color:var(--c-text-muted);font-size:12px;margin-left:6px">至少选一年；姓名登录后自动获取</span></label>
+            <div class="year-pills" id="yearPills"></div>
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label class="field-label">任务模式</label>
+            <div class="segmented" role="radiogroup" id="modeGroup">
+              <button type="button" role="radio" aria-pressed="true" data-val="normal" onclick="selectMode(this)">标准</button>
+              <button type="button" role="radio" aria-pressed="false" data-val="fast" onclick="selectMode(this)">快速</button>
+            </div>
+          </div>
+        </div>
+        <!-- Excel 上传 -->
+        <div class="upload-zone" id="uploadZone" style="margin-top:14px"
+             onclick="document.getElementById('fileInput').click()"
+             ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--c-text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <p>拖拽 Excel 到此处，或点击选择文件</p>
+          <p style="font-size:12px;margin-top:2px" id="uploadHint">仅支持 .xlsx；表头须为中文（姓名/账号/密码…）</p>
+          <input type="file" id="fileInput" accept=".xlsx" style="display:none" onchange="uploadFile(this.files[0])">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('fileInput').click()">
+            <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v3a1 1 0 001 1h10a1 1 0 001-1v-3M8 2v8M5 7l3 3 3-3"/></svg>导入 Excel
+          </button>
+          <button type="submit" class="btn btn-primary" id="btnAdd">
+            <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 2v12M2 8h12"/></svg>添加 <kbd>N</kbd>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Account List ───────────────────────────────────────────────────── -->
+  <section class="panel" id="listPanel" data-open="true">
+    <div class="panel-header" onclick="togglePanel('listPanel')">
+      <h2>账号列表</h2>
+      <span class="panel-badge" id="listBadge">0</span>
+      <svg class="chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10 10l3 3"/></svg>
+          <input class="input" id="searchInput" type="text" placeholder="搜索姓名/账号/说明…" oninput="debounceSearch()">
+        </div>
+        <div class="segmented" id="statusFilter">
+          <button aria-pressed="true" data-val="" onclick="setFilter(this)">全部</button>
+          <button aria-pressed="false" data-val="queued" onclick="setFilter(this)">排队</button>
+          <button aria-pressed="false" data-val="running" onclick="setFilter(this)">进行中</button>
+          <button aria-pressed="false" data-val="completed" onclick="setFilter(this)">已完成</button>
+          <button aria-pressed="false" data-val="failed" onclick="setFilter(this)">失败</button>
+          <button aria-pressed="false" data-val="waiting_apply" id="filterWaitApply" onclick="setFilter(this)" style="display:none">等待申请</button>
+        </div>
+        <input class="input" id="dateFrom" type="date" title="创建时间起" onchange="refresh()" style="width:132px;padding:6px 8px;font-size:12px">
+        <input class="input" id="dateTo" type="date" title="创建时间止" onchange="refresh()" style="width:132px;padding:6px 8px;font-size:12px">
+        <span class="toolbar-count" id="toolbarCount">共 0 条</span>
+      </div>
+      <!-- Skeleton -->
+      <div id="skeleton">
+        <div class="skeleton-row"><div class="skeleton" style="width:80px"></div><div class="skeleton" style="width:120px"></div><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:80px"></div></div>
+        <div class="skeleton-row"><div class="skeleton" style="width:90px"></div><div class="skeleton" style="width:110px"></div><div class="skeleton" style="width:70px"></div><div class="skeleton" style="width:60px"></div></div>
+        <div class="skeleton-row"><div class="skeleton" style="width:70px"></div><div class="skeleton" style="width:130px"></div><div class="skeleton" style="width:50px"></div><div class="skeleton" style="width:90px"></div></div>
+      </div>
+      <!-- Table (desktop) -->
+      <div class="table-wrap" id="tableWrap" style="display:none">
+        <table>
+          <colgroup id="tableColgroup"></colgroup>
+          <thead>
+            <tr id="tableHeadRow">
+              <th class="td-name">姓名</th>
+              <th class="td-user">账号</th>
+              <th class="td-subjects">学科·学分</th>
+              <th class="td-status">状态</th>
+              <th class="td-msg">说明</th>
+              <th class="td-actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <!-- Mobile cards -->
+      <div class="card-list" id="cardList"></div>
+      <!-- Pagination -->
+      <div class="list-pagination" id="listPagination" style="display:none">
+        <span class="list-pagination-info" id="paginationInfo">第 1–50 条，共 0 条</span>
+        <div class="list-pagination-actions">
+          <label class="list-pagination-info" style="display:flex;align-items:center;gap:6px">
+            每页
+            <select class="input" id="pageSizeSelect" onchange="changePageSize(this.value)">
+              <option value="20">20</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </label>
+          <button class="btn btn-outline btn-sm" id="btnPrevPage" onclick="goPageDelta(-1)">上一页</button>
+          <span class="list-pagination-info" id="paginationPage">第 1 / 1 页</span>
+          <button class="btn btn-outline btn-sm" id="btnNextPage" onclick="goPageDelta(1)">下一页</button>
+        </div>
+      </div>
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="var(--c-border-strong)" stroke-width="1.5"/>
+          <path d="M22 36C22 28 42 28 42 36" stroke="var(--c-border-strong)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="32" cy="26" r="5" stroke="var(--c-border-strong)" stroke-width="1.5"/>
+        </svg>
+        <p class="empty-title" id="emptyTitle">暂无账号</p>
+        <p class="empty-sub" id="emptySub">点击上方表单添加，或导入 Excel</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ── Toast Stack ───────────────────────────────────────────────────────── -->
+<div id="toastStack"></div>
+<!-- ── Modal ────────────────────────────────────────────────────────────── -->
+<div id="modalMount"></div>
+<!-- ── Drawer ────────────────────────────────────────────────────────────── -->
+<div id="drawerMount"></div>
+
+<script>
+"use strict";
+(function(){
+
+// ── State ───────────────────────────────────────────────────────────────────
+let _accounts=[], _filter='', _search='', _paused=false, _concurrency=400;
+let _page=1, _pageSize=50, _filteredTotal=0;
+let _inflight=false, _pollTimer=null;
+let _config={site_profile:'A',has_credit_apply:false,has_subjects:true,has_recharge:false,credential_input_mode:'split'};
+const STATUS_LABEL={  queued:'排队',running:'进行中',waiting_apply:'等待申请',
+  completed:'已完成',failed:'失败',paused:'已暂停'};
+const isB=()=>_config.site_profile==='B';
+const isCombinedCred=()=>_config.credential_input_mode==='combined';
+
+// ── API ─────────────────────────────────────────────────────────────────────
+async function api(method,path,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body!=null) opts.body=JSON.stringify(body);
+  const r=await fetch(path,opts);
+  const data=await r.json().catch(()=>({detail:r.statusText}));
+  if(!r.ok) throw new Error(data.detail||'请求失败');
+  return data;
+}
+async function apiFetch(path){
+  const r=await fetch(path); const data=await r.json().catch(()=>({detail:r.statusText}));
+  if(!r.ok) throw new Error(data.detail||'请求失败'); return data;
+}
+
+// ── Polling ──────────────────────────────────────────────────────────────────
+function startPolling(){
+  stopPolling();
+  const delay=document.hidden?30000:5000;
+  _pollTimer=setTimeout(()=>{refresh().then(startPolling)},delay);
+}
+function stopPolling(){if(_pollTimer){clearTimeout(_pollTimer);_pollTimer=null;}}
+document.addEventListener('visibilitychange',()=>{stopPolling();refresh().then(startPolling);});
+
+async function refresh(){
+  if(_inflight) return;
+  _inflight=true;
+  const dot=document.getElementById('loadingDot');
+  if(dot) dot.style.display='inline-block';
+  try{
+    const params=new URLSearchParams({
+      limit:String(_pageSize),
+      offset:String((_page-1)*_pageSize),
+    });
+    if(_filter) params.set('status',_filter);
+    if(_search) params.set('search',_search);
+    const df=document.getElementById('dateFrom')?.value;
+    const dt=document.getElementById('dateTo')?.value;
+    if(df) params.set('date_from', String(Math.floor(new Date(df+'T00:00:00').getTime()/1000)));
+    if(dt) params.set('date_to', String(Math.floor(new Date(dt+'T23:59:59').getTime()/1000)));
+    let data=await apiFetch('/api/accounts?'+params);
+    _filteredTotal=data.filtered_total??data.total??(data.items||[]).length;
+    const totalPages=Math.max(1,Math.ceil(_filteredTotal/_pageSize));
+    if(_page>totalPages){
+      _page=totalPages;
+      params.set('offset', String((_page-1)*_pageSize));
+      data=await apiFetch('/api/accounts?'+params);
+    }
+    _accounts=data.items||[];
+    _filteredTotal=data.filtered_total??data.total??_accounts.length;
+    _paused=data.paused||false;
+    _concurrency=data.concurrency_limit||400;
+    updateStats(data);
+    renderList();
+    updatePagination();
+    updateHeader();
+  }catch(e){
+    window.ui.toast('刷新失败：'+e.message,'danger');
+  }finally{
+    _inflight=false;
+    if(dot) dot.style.display='none';
+    const sync=document.getElementById('lastSync');
+    if(sync) sync.textContent='更新于 '+new Date().toTimeString().slice(0,8);
+  }
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+const _prev={};
+function countUp(id,val){
+  const el=document.getElementById(id); if(!el) return;
+  const prev=_prev[id]||0; if(prev===val){el.textContent=val;return;}
+  _prev[id]=val;
+  const start=Date.now(),dur=100,diff=val-prev;
+  function frame(){
+    const t=Math.min(1,(Date.now()-start)/dur);
+    el.textContent=Math.round(prev+diff*t);
+    if(t<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function updateStats(data){
+  const c=data.counts||{};
+  countUp('tTotal',c.total||0);
+  countUp('tQueued',c.queued||0);
+  countUp('tRunning',c.running||0);
+  countUp('tWaiting',c.waiting_apply||0);
+  countUp('tCompleted',c.completed||0);
+  countUp('tFailed',c.failed||0);
+  countUp('tWorkers',data.active_workers||0);
+  document.getElementById('concurrencyInput').value=data.concurrency_limit||400;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+function updateHeader(){
+  const badge=document.getElementById('schedBadge');
+  const text=document.getElementById('schedText');
+  const pause=document.getElementById('btnPause');
+  const resume=document.getElementById('btnResume');
+  if(_paused){
+    badge.dataset.tone='paused'; text.textContent='已暂停';
+    pause.style.display='none'; resume.style.display='';
+  }else{
+    badge.dataset.tone='running'; text.textContent='调度中';
+    pause.style.display=''; resume.style.display='none';
+  }
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+const _listMq=window.matchMedia('(max-width:640px)');
+function applyListLayout(){
+  const tableWrap=document.getElementById('tableWrap');
+  const cardList=document.getElementById('cardList');
+  const hasData=!!_accounts.length;
+  const mobile=_listMq.matches;
+  if(hasData&&!mobile){
+    tableWrap.style.display='block';
+    tableWrap.style.opacity='1';
+  }else{
+    tableWrap.style.display='none';
+  }
+  cardList.style.display=hasData&&mobile?'flex':'none';
+}
+_listMq.addEventListener('change',()=>{applyListLayout();});
+
+function renderList(){
+  const tbody=document.getElementById('tableBody');
+  const cardList=document.getElementById('cardList');
+  const emptyState=document.getElementById('emptyState');
+  const tableWrap=document.getElementById('tableWrap');
+  const skeleton=document.getElementById('skeleton');
+  skeleton.style.display='none';
+
+  const start=_filteredTotal?(_page-1)*_pageSize+1:0;
+  const end=_filteredTotal?Math.min(_page*_pageSize,_filteredTotal):0;
+  document.getElementById('listBadge').textContent=_filteredTotal;
+  document.getElementById('toolbarCount').textContent=_filteredTotal
+    ?`第 ${start}–${end} 条，共 ${_filteredTotal} 条`:'共 0 条';
+
+  if(!_accounts.length){
+    tableWrap.style.display='none';
+    cardList.style.display='none';
+    emptyState.style.display='flex';
+    const title=document.getElementById('emptyTitle');
+    const sub=document.getElementById('emptySub');
+    if(_search){title.textContent='无搜索结果';sub.textContent='没有匹配 "'+_search+'" 的账号';}
+    else{title.textContent='暂无账号';sub.textContent='点击上方表单添加，或导入 Excel';}
+    tbody.innerHTML='';
+    cardList.innerHTML='';
+    updatePagination();
+    return;
+  }
+  emptyState.style.display='none';
+  applyListLayout();
+  if(tableWrap) tableWrap.style.opacity='1';
+
+  tbody.innerHTML=_accounts.map(a=>rowHtml(a)).join('');
+  cardList.innerHTML=_accounts.map(a=>cardHtml(a)).join('');
+}
+
+function updatePagination(){
+  const bar=document.getElementById('listPagination');
+  const info=document.getElementById('paginationInfo');
+  const pageEl=document.getElementById('paginationPage');
+  const prev=document.getElementById('btnPrevPage');
+  const next=document.getElementById('btnNextPage');
+  const sizeSel=document.getElementById('pageSizeSelect');
+  if(!bar) return;
+  const totalPages=Math.max(1,Math.ceil(_filteredTotal/_pageSize));
+  const start=_filteredTotal?(_page-1)*_pageSize+1:0;
+  const end=_filteredTotal?Math.min(_page*_pageSize,_filteredTotal):0;
+  bar.style.display=_filteredTotal>0?'flex':'none';
+  if(info) info.textContent=`第 ${start}–${end} 条，共 ${_filteredTotal} 条`;
+  if(pageEl) pageEl.textContent=`第 ${_page} / ${totalPages} 页`;
+  if(prev) prev.disabled=_page<=1;
+  if(next) next.disabled=_page>=totalPages;
+  if(sizeSel) sizeSel.value=String(_pageSize);
+}
+function goPageDelta(d){
+  const totalPages=Math.max(1,Math.ceil(_filteredTotal/_pageSize));
+  const next=Math.min(totalPages,Math.max(1,_page+d));
+  if(next===_page) return;
+  _page=next;
+  refresh();
+}
+function changePageSize(v){
+  const n=parseInt(v,10);
+  if(!n||n===_pageSize) return;
+  _pageSize=n;
+  _page=1;
+  refresh();
+}
+
+function subjectTags(a){
+  try{
+    const reqs=JSON.parse(a.requirements_json||'[]');
+    if(!reqs.length) return '<span class="tag" style="color:var(--c-text-muted)">—</span>';
+    return reqs.map(r=>`<span class="tag">${esc(r.category)} ${r.credits?r.credits+'分':''}</span>`).join('');
+  }catch{return '—';}
+}
+
+function yearSummary(a){
+  try{
+    const years=JSON.parse(a.target_years_json||'[]');
+    return years.length?years.join('、'):'—';
+  }catch{return '—';}
+}
+
+function chapterProgressPct(extra, status){
+  if(!extra) return 0;
+  if(status==='running'){
+    if(extra.current_chapter_progress!=null) return extra.current_chapter_progress;
+  }
+  if(extra.server_chapter_progress!=null) return extra.server_chapter_progress;
+  return extra.current_chapter_progress??extra.progress_percent??0;
+}
+
+function progressPercent(a){
+  try{
+    const extra=JSON.parse(a.extra_json||'{}');
+    const ys=extra.year_status||{};
+    const vals=Object.values(ys);
+    if(!vals.length){
+      if(extra.year_progress_percent!=null) return extra.year_progress_percent;
+      return chapterProgressPct(extra, a.status);
+    }
+    const pcts=vals.map(y=>y.progress_percent!=null?y.progress_percent:
+      (y.required_hours>0?Math.round(100*y.earned_hours/y.required_hours):0));
+    return Math.min(...pcts);
+  }catch{return 0;}
+}
+
+function phaseSummary(extra, status){
+  const labels={
+    login:'登录中',
+    course_discover:'获取课程',
+    profile_fetch_failed:'获取资料失败',
+    video_play:'视频学习',
+    done:'已完成',
+    assigning:'分配课程',
+  };
+  if(extra.phase==='video_play'){
+    const course=extra.current_course_title||'';
+    const chapter=extra.current_chapter_title||'';
+    const pct=chapterProgressPct(extra, status||'running');
+    if(course||chapter){
+      let text='学习中';
+      if(course) text+=`：${course}`;
+      if(chapter&&chapter!==course) text+=` / ${chapter}`;
+      if(pct!=null) text+=`（${pct}%）`;
+      return text;
+    }
+  }
+  return labels[extra.phase]||extra.phase||'—';
+}
+
+function phaseDetailHtml(extra, status){
+  const summary=phaseSummary(extra, status);
+  if(extra.phase==='video_play'&&(extra.current_course_title||extra.current_chapter_title)){
+    const pct=chapterProgressPct(extra, status||'running');
+    return `<div>${esc(summary)}</div>
+      <div class="progress-bar" style="margin-top:6px;max-width:240px"><span style="width:${pct}%"></span></div>`;
+  }
+  return esc(summary);
+}
+
+function accountDisplayName(a,extra){
+  if(!extra){
+    try{extra=JSON.parse(a.extra_json||'{}');}catch{extra={};}
+  }
+  return a.display_name||extra.real_name||a.username||'—';
+}
+
+function rowHtml(a){
+  const cls=a.status==='failed'?'is-failed':'';
+  const acts=`<div class="actions-group">
+      <button class="btn btn-ghost btn-sm" onclick="requeueAccount(${a.id})">重学</button>
+      <button class="btn btn-outline btn-sm" onclick="editRequeue(${a.id})">编辑重学</button>
+      <button class="btn btn-icon btn-ghost" onclick="deleteAccount(${a.id})" title="删除" style="color:var(--c-text-muted);transition:color var(--dur-fast);" onmouseenter="this.style.color='var(--c-danger)'" onmouseleave="this.style.color='var(--c-text-muted)'">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 14,4"/><path d="M5 4V2h6v2M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+      </button>
+    </div>`;
+  if(isB()){
+    let extra={};
+    try{extra=JSON.parse(a.extra_json||'{}');}catch{extra={};}
+    const pct=progressPercent(a);
+    const name=accountDisplayName(a,extra);
+    return `<tr class="${cls}">
+      <td class="td-name" onclick="openDrawer(${a.id})">${esc(name)}</td>
+      <td class="td-user" title="${esc(a.username)}">${esc(a.username)}</td>
+      <td class="td-msg">${esc(extra.remark||'—')}</td>
+      <td class="td-years">${esc(yearSummary(a))}</td>
+      <td class="td-status">${pillHtml(a.status)}</td>
+      <td class="td-progress" title="${esc(a.status_msg||'')}"><span style="font-size:12px;color:var(--c-text-muted)">${pct}%</span><div class="progress-bar"><span style="width:${pct}%"></span></div></td>
+      <td class="td-actions">${acts}</td>
+    </tr>`;
+  }
+  return `<tr class="${cls}">
+    <td class="td-name" onclick="openDrawer(${a.id})">${esc(a.display_name||a.username)}</td>
+    <td class="td-user" title="${esc(a.username)}">${esc(a.username)}</td>
+    <td class="td-subjects"><div class="tags">${subjectTags(a)}</div></td>
+    <td class="td-status">${pillHtml(a.status)}</td>
+    <td class="td-msg" title="${esc(a.status_msg||'')}">${esc(a.status_msg||'—')}</td>
+    <td class="td-actions">${acts}</td>
+  </tr>`;
+}
+
+function cardHtml(a){
+  let extra={};
+  try{extra=JSON.parse(a.extra_json||'{}');}catch{extra={};}
+  const name=accountDisplayName(a,extra);
+  const sub=isB()?`目标年度：${yearSummary(a)} · 进度 ${progressPercent(a)}%`:a.username;
+  const tags=isB()?'':`<div class="tags">${subjectTags(a)}</div>`;
+  return `<div class="mobile-card">
+    <div class="mc-top"><span class="mc-name" onclick="openDrawer(${a.id})">${esc(name)}</span>${pillHtml(a.status)}</div>
+    <div class="mc-user">${esc(sub)}</div>
+    ${tags}
+    ${a.status_msg?`<div class="mc-msg">${esc(a.status_msg)}</div>`:''}
+    <div class="mc-actions">
+      <button class="btn btn-ghost btn-sm" onclick="requeueAccount(${a.id})">重学</button>
+      <button class="btn btn-outline btn-sm" onclick="editRequeue(${a.id})">编辑重学</button>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteAccount(${a.id})" style="color:var(--c-text-muted)" onmouseenter="this.style.color='var(--c-danger)'" onmouseleave="this.style.color='var(--c-text-muted)'">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function applyCredentialInputLayout(){
+  const combined=isCombinedCred();
+  ['A','B'].forEach(s=>{
+    const wrap=document.getElementById('fCredentialWrap'+s);
+    if(wrap) wrap.style.display=combined?'block':'none';
+    document.querySelectorAll('#addForm'+s+' .field-credential-split').forEach(el=>{
+      el.style.display=combined?'none':'block';
+    });
+  });
+}
+function applyTableColumns(){
+  const cg=document.getElementById('tableColgroup');
+  if(!cg) return;
+  const widths=isB()
+    ?['88px','152px','96px','96px','100px','108px','200px']
+    :['96px','152px','','100px','','200px'];
+  cg.innerHTML=widths.map(w=>`<col${w?` style="width:${w}"`:''}>`).join('');
+}
+function applyLayout(){
+  const b=isB();
+  document.getElementById('addFormA').style.display=b?'none':'';
+  document.getElementById('addFormB').style.display=b?'':'none';
+  applyCredentialInputLayout();
+  const credHint=isCombinedCred()?'；可填「账号密码」一栏或分列':'';
+  document.getElementById('uploadHint').textContent=b
+    ?`仅支持 .xlsx；表头须为中文（账号/密码/目标年度…${credHint}）`
+    :`仅支持 .xlsx；表头须为中文（姓名/账号/密码…${credHint}）`;
+  const waitTile=document.getElementById('tileWaitApply');
+  const waitFilter=document.getElementById('filterWaitApply');
+  const showWait=!!_config.has_credit_apply;
+  if(waitTile) waitTile.style.display=showWait?'':'none';
+  if(waitFilter) waitFilter.style.display=showWait?'':'none';
+  const head=document.getElementById('tableHeadRow');
+  if(head){
+    head.innerHTML=b
+      ?'<th class="td-name">姓名</th><th class="td-user">账号</th><th class="td-msg">备注</th><th class="td-years">目标年度</th><th class="td-status">状态</th><th class="td-progress">进度</th><th class="td-actions">操作</th>'
+      :'<th class="td-name">姓名</th><th class="td-user">账号</th><th class="td-subjects">学科·学分</th><th class="td-status">状态</th><th class="td-msg">说明</th><th class="td-actions">操作</th>';
+  }
+  applyTableColumns();
+}
+
+function pillHtml(status){
+  const tone=status==='retrying'?'queued':status;
+  const label=STATUS_LABEL[tone]||STATUS_LABEL[status]||status;
+  return `<span class="pill" data-tone="${tone}"><span class="dot"></span>${label}</span>`;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+function filterByStatus(s){
+  _filter=s;
+  _page=1;
+  document.querySelectorAll('#statusFilter button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.val===s?'true':'false'));
+  document.querySelectorAll('#statsGrid .stat-tile').forEach(t=>t.dataset.active=(t.dataset.filter===s).toString());
+  refresh();
+}
+function setFilter(btn){
+  filterByStatus(btn.dataset.val);
+}
+let _debTimer=null;
+function debounceSearch(){_search=document.getElementById('searchInput').value;_page=1;clearTimeout(_debTimer);_debTimer=setTimeout(refresh,250);}
+
+function togglePanel(id){
+  const p=document.getElementById(id);
+  p.dataset.open=p.dataset.open==='false'?'true':'false';
+}
+
+// ── Add Form ─────────────────────────────────────────────────────────────────
+function recentFiveYears(){
+  const y=new Date().getFullYear();
+  return [0,1,2,3,4].map(i=>String(y-i));
+}
+function initYearPills(){
+  const wrap=document.getElementById('yearPills');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const curY=String(new Date().getFullYear());
+  recentFiveYears().forEach(yr=>{
+    const lbl=document.createElement('label');
+    lbl.className='year-pill';
+    lbl.innerHTML=`<input type="checkbox" name="target_years" value="${yr}"${yr===curY?' checked':''}>${yr}年`;
+    wrap.appendChild(lbl);
+  });
+}
+function selectMode(btn){
+  btn.closest('[role=radiogroup]').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed','false');});
+  btn.setAttribute('aria-pressed','true');
+}
+function focusAddField(){
+  if(isCombinedCred()){
+    document.getElementById(isB()?'fCredentialB':'fCredentialA')?.focus();
+    return;
+  }
+  if(isB()) document.getElementById('fUserB')?.focus();
+  else document.getElementById('fName')?.focus();
+}
+const CRED_USER_TERMS=['登录账号','登陆账号','登录名','登陆名','用户名称','用户名','手机号码','手机号','电子邮件','账户名','账号名','会员号','账号','帐号','账户','帐户','用户','工号','学号','手机','电话','邮箱','account','username','login','email','mail','user'];
+const CRED_PASS_TERMS=['登录密码','登陆密码','用户密码','账户密码','帐户密码','帐号密码','密码','口令','通行码','password','pwd','pass'];
+const CRED_VAL_SEP='[:：=是为\\-—–|>|→]';
+const CRED_BR_OPEN='[\\[【「《(（]';
+const CRED_BR_CLOSE='[\\]】」》)）]';
+function credEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function credLabel(terms){return '(?:'+terms.map(credEsc).join('|')+')';}
+const CRED_USER_L=credLabel(CRED_USER_TERMS);
+const CRED_PASS_L=credLabel(CRED_PASS_TERMS);
+function credClean(v){
+  v=String(v||'').trim().replace(/^["'""'']+|["'""'']+$/g,'');
+  v=v.replace(new RegExp('^'+CRED_BR_OPEN+'+|'+CRED_BR_CLOSE+'+$','g'),'');
+  return v.trim().replace(/^[，,;；.]+|[，,;；.]+$/g,'');
+}
+function credNormSpaces(s){
+  return String(s).replace(/\u3000/g,' ').replace(/\xa0/g,' ').replace(/[，,;；&]+/g,' ').replace(/\s+/g,' ').trim();
+}
+function credInline(raw){return credNormSpaces(raw.replace(/\r\n/g,' ').replace(/\n/g,' '));}
+function credHasExplicitLabel(inline){
+  return new RegExp('(?:^|[\\s])'+CRED_USER_L+'\\s*(?:'+CRED_VAL_SEP+'|[\\s'+CRED_BR_OPEN+'])','i').test(inline)
+    || new RegExp('(?:^|[\\s])'+CRED_PASS_L+'\\s*(?:'+CRED_VAL_SEP+'|[\\s'+CRED_BR_OPEN+'])','i').test(inline);
+}
+function credTryLabeledPair(inline){
+  const pats=[
+    new RegExp(CRED_BR_OPEN+CRED_USER_L+CRED_BR_CLOSE+'\\s*(.+?)\\s*'+CRED_BR_OPEN+CRED_PASS_L+CRED_BR_CLOSE+'\\s*(.+)$','i'),
+    new RegExp(CRED_USER_L+CRED_BR_OPEN+'(.+?)'+CRED_BR_CLOSE+'\\s*'+CRED_PASS_L+CRED_BR_OPEN+'(.+?)'+CRED_BR_CLOSE+'\\s*$','i'),
+    new RegExp(CRED_USER_L+'\\s*'+CRED_VAL_SEP+'\\s*(.+?)'+CRED_PASS_L+'\\s*'+CRED_VAL_SEP+'\\s*(.+)$','i'),
+    new RegExp(CRED_BR_OPEN+'?'+CRED_USER_L+CRED_BR_CLOSE+'?\\s*'+CRED_VAL_SEP+'?\\s*(.+?)\\s+'+CRED_BR_OPEN+'?'+CRED_PASS_L+CRED_BR_CLOSE+'?\\s*'+CRED_VAL_SEP+'?\\s*(.+)$','i'),
+    new RegExp(CRED_USER_L+'\\s+(.+?)\\s+'+CRED_PASS_L+'\\s+(.+)$','i'),
+    new RegExp(CRED_USER_L+'\\s*'+CRED_VAL_SEP+'\\s*(.+?)\\s+'+CRED_PASS_L+'\\s*'+CRED_VAL_SEP+'\\s*(.+)$','i'),
+  ];
+  for(const re of pats){
+    const m=inline.match(re);
+    if(m){const u=credClean(m[1]),p=credClean(m[2]);if(u&&p)return{username:u,password:p};}
+  }
+  return null;
+}
+function credTryMultiline(raw){
+  const lines=raw.split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean);
+  let userVal=null,passVal=null,i=0;
+  while(i<lines.length){
+    const ln=lines[i];
+    function take(labelRe){
+      if(new RegExp('^'+labelRe+'\\s*'+CRED_VAL_SEP+'?\\s*$','i').test(ln)){
+        if(i+1<lines.length){i++;return credClean(lines[i]);}
+        return null;
+      }
+      let m=ln.match(new RegExp('^(?:'+CRED_BR_OPEN+')?'+labelRe+'(?:'+CRED_BR_CLOSE+')?\\s*'+CRED_VAL_SEP+'?\\s*(.+)$','i'));
+      if(m)return credClean(m[1]);
+      m=ln.match(new RegExp('^'+CRED_BR_OPEN+labelRe+CRED_BR_CLOSE+'\\s*'+CRED_VAL_SEP+'?\\s*(.+)$','i'));
+      if(m)return credClean(m[1]);
+      return null;
+    }
+    const u=take(CRED_USER_L);
+    if(u!==null){userVal=u;i++;continue;}
+    const p=take(CRED_PASS_L);
+    if(p!==null){passVal=p;i++;continue;}
+    i++;
+  }
+  if(userVal&&passVal)return{username:userVal,password:passVal};
+  return null;
+}
+function credTryKv(inline){
+  let userVal=null,passVal=null;
+  inline.split(/\s+/).forEach(part=>{
+    let m=part.match(new RegExp('^'+CRED_USER_L+'=(.+)$','i'));
+    if(m){userVal=credClean(m[1]);return;}
+    m=part.match(new RegExp('^'+CRED_PASS_L+'=(.+)$','i'));
+    if(m)passVal=credClean(m[1]);
+  });
+  if(userVal&&passVal)return{username:userVal,password:passVal};
+  return null;
+}
+function credTryPipe(inline){
+  const parts=inline.split('|').map(s=>s.trim());
+  if(parts.length===4&&new RegExp('^'+CRED_USER_L+'$','i').test(parts[0])&&new RegExp('^'+CRED_PASS_L+'$','i').test(parts[2])){
+    const u=credClean(parts[1]),p=credClean(parts[3]);
+    if(u&&p)return{username:u,password:p};
+  }
+  return null;
+}
+function parseCombinedCredentials(text){
+  const raw=String(text||'').trim();
+  if(!raw) throw new Error('请输入账号密码');
+  const inline=credInline(raw);
+  for(const fn of [()=>credTryPipe(inline),()=>credTryLabeledPair(inline),()=>credTryMultiline(raw),()=>credTryKv(inline)]){
+    const r=fn();
+    if(r)return r;
+  }
+  if(!credHasExplicitLabel(inline)){
+    for(const sep of ['：',':']){
+      if(inline.includes(sep)){
+        const i=inline.indexOf(sep);
+        const left=credClean(inline.slice(0,i)),right=credClean(inline.slice(i+1));
+        if(left&&right)return{username:left,password:right};
+      }
+    }
+    if(inline.includes('/')&&inline.split('/').length===2){
+      const [left,right]=inline.split('/');
+      const u=credClean(left),p=credClean(right);
+      if(u&&p&&!u.includes(' ')&&!p.includes(' '))return{username:u,password:p};
+    }
+  }
+  const parts=inline.split(/\s+/);
+  if(parts.length>=2)return{username:parts[0],password:parts.slice(1).join(' ')};
+  throw new Error('无法识别账号和密码，请检查格式');
+}
+function readAddCredentials(isBForm){
+  if(isCombinedCred()){
+    const el=document.getElementById(isBForm?'fCredentialB':'fCredentialA');
+    const parsed=parseCombinedCredentials(el?.value||'');
+    return {username:parsed.username,password:parsed.password,credentials_combined:el?.value?.trim()||''};
+  }
+  if(isBForm) return {username:v('fUserB'),password:v('fPassB'),credentials_combined:''};
+  return {username:v('fUser'),password:v('fPass'),credentials_combined:''};
+}
+async function submitAddForm(e){
+  e.preventDefault();
+  const btn=document.getElementById('btnAdd');
+  btn.setAttribute('aria-busy','true');
+  try{
+    if(isB()){
+      let user, pass, credCombined;
+      try{
+        ({username:user,password:pass,credentials_combined:credCombined}=readAddCredentials(true));
+      }catch(err){window.ui.toast(err.message,'warning');return;}
+      if(!user||!pass){window.ui.toast('账号和密码为必填','warning');return;}
+      const years=[...document.querySelectorAll('#yearPills input:checked')].map(i=>i.value);
+      if(!years.length){window.ui.toast('请至少选择一个目标年度','warning');return;}
+      const mode=document.querySelector('#modeGroup [aria-pressed="true"]')?.dataset.val||'normal';
+      const extra={};
+      if(v('fRemarkB')) extra.remark=v('fRemarkB');
+      const body={username:user,password:pass,target_years:years,report_mode:mode,extra};
+      if(credCombined) body.credentials_combined=credCombined;
+      await api('POST','/api/accounts',body);
+      document.getElementById('addForm').reset();
+      initYearPills();
+      focusAddField();
+    }else{
+      const name=v('fName');
+      let user, pass, credCombined;
+      try{
+        ({username:user,password:pass,credentials_combined:credCombined}=readAddCredentials(false));
+      }catch(err){window.ui.toast(err.message,'warning');return;}
+      if(!user||!pass){window.ui.toast('账号和密码为必填','warning');return;}
+      const reqs=[];
+      const s1=v('fSubject1'),c1=parseFloat(v('fCredit1')||'0');
+      const s2=v('fSubject2'),c2=parseFloat(v('fCredit2')||'0');
+      if(s1) reqs.push({category:s1,credits:c1});
+      if(s2) reqs.push({category:s2,credits:c2});
+      const extra={};
+      if(_config.has_recharge&&v('fCard')) extra.card_no=v('fCard');
+      if(_config.has_recharge&&v('fCardPwd')) extra.card_password=v('fCardPwd');
+      if(v('fRemark')) extra.remark=v('fRemark');
+      const body={display_name:name||user,username:user,password:pass,requirements:reqs,extra};
+      if(credCombined) body.credentials_combined=credCombined;
+      await api('POST','/api/accounts',body);
+      document.getElementById('addForm').reset();
+      focusAddField();
+    }
+    window.ui.toast('账号已添加','success',2500);
+    await refresh();
+  }catch(err){window.ui.toast(err.message,'danger');}
+  finally{btn.removeAttribute('aria-busy');}
+}
+function v(id){return (document.getElementById(id)||{}).value||'';}
+
+// ── Upload ───────────────────────────────────────────────────────────────────
+function dragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag-over');}
+function dragLeave(){document.getElementById('uploadZone').classList.remove('drag-over');}
+function dropFile(e){e.preventDefault();dragLeave();const f=e.dataTransfer.files[0];if(f)uploadFile(f);}
+async function uploadFile(file){
+  if(!file) return;
+  const fd=new FormData(); fd.append('file',file);
+  try{
+    const r=await fetch('/api/accounts/upload',{method:'POST',body:fd});
+    const d=await r.json().catch(()=>({detail:r.statusText}));
+    if(!r.ok) throw new Error(d.detail||'上传失败');
+    const msg=`导入：新增 ${d.added}，跳过 ${d.skipped}，失败 ${d.failed}`;
+    window.ui.toast(msg,d.failed>0?'warning':'success');
+    await refresh();
+  }catch(e){window.ui.toast(e.message,'danger');}
+  document.getElementById('fileInput').value='';
+}
+
+// ── Account Actions ───────────────────────────────────────────────────────────
+async function requeueAccount(id){
+  const a=_accounts.find(x=>x.id===id);
+  const running=a&&a.status==='running';
+  const body=running?'将中断当前任务并重新入队，保留登录 cookies，清除运行记录。确定继续？':'将清除运行数据，保留登录 cookies，重新入队。确定继续？';
+  if(!await window.ui.confirm({title:'确认重学',body,okText:'重学',okTone:'primary'})) return;
+  try{await api('POST',`/api/accounts/${id}/requeue`);window.ui.toast('已重新入队','success',2000);await refresh();}
+  catch(e){window.ui.toast(e.message,'danger');}
+}
+
+async function editRequeue(id){
+  const a=_accounts.find(x=>x.id===id); if(!a) return;
+  const extra=JSON.parse(a.extra_json||'{}');
+  const reqs=JSON.parse(a.requirements_json||'[]');
+  const years=JSON.parse(a.target_years_json||'[]');
+  const running=a.status==='running';
+  const el=document.createElement('div');
+  if(isB()){
+    const yearChecks=recentFiveYears().map(yr=>{
+      const chk=years.includes(yr)?' checked':'';
+      return `<label class="year-pill" style="margin:4px"><input type="checkbox" class="eYear" value="${yr}"${chk}>${yr}年</label>`;
+    }).join('');
+    el.innerHTML=`<form id="editForm" class="form-grid" style="margin-top:4px">
+      <div class="field"><label class="field-label">账号</label><input class="input" value="${esc(a.username)}" readonly style="opacity:.6"></div>
+      <div class="field"><label class="field-label">密码（空则不修改）</label><input class="input" id="ePass" type="password" placeholder="不修改请留空"></div>
+      <div class="field"><label class="field-label">备注</label><input class="input" id="eRemark" value="${esc(extra.remark||'')}"></div>
+      <div class="field" style="grid-column:1/-1"><label class="field-label">目标年度</label><div class="year-pills">${yearChecks}</div></div>
+      <div class="field" style="grid-column:1/-1"><label class="field-label">任务模式</label>
+        <div class="segmented" id="eModeGroup">
+          <button type="button" data-val="normal" aria-pressed="${extra.report_mode!=='fast'}" onclick="selectMode(this)">标准</button>
+          <button type="button" data-val="fast" aria-pressed="${extra.report_mode==='fast'}" onclick="selectMode(this)">快速</button>
+        </div></div>
+    </form>`;
+  }else{
+    el.innerHTML=`<form id="editForm" class="form-grid" style="margin-top:4px">
+      <div class="field"><label class="field-label">姓名</label><input class="input" id="eName" value="${esc(a.display_name||'')}"></div>
+      <div class="field"><label class="field-label">账号</label><input class="input" value="${esc(a.username)}" readonly style="opacity:.6"></div>
+      <div class="field"><label class="field-label">密码（空则不修改）</label><input class="input" id="ePass" type="password" placeholder="不修改请留空"></div>
+      <div class="field"><label class="field-label">学科1</label><input class="input" id="eSub1" value="${esc((reqs[0]||{}).category||'')}"></div>
+      <div class="field"><label class="field-label">学分1</label><input class="input" id="eCr1" type="number" min="0" step="0.5" value="${(reqs[0]||{}).credits||''}"></div>
+      <div class="field"><label class="field-label">学科2</label><input class="input" id="eSub2" value="${esc((reqs[1]||{}).category||'')}"></div>
+      <div class="field"><label class="field-label">学分2</label><input class="input" id="eCr2" type="number" min="0" step="0.5" value="${(reqs[1]||{}).credits||''}"></div>
+      <div class="field"><label class="field-label">备注</label><input class="input" id="eRemark" value="${esc(extra.remark||'')}"></div>
+    </form>`;
+  }
+  const confirmed=await window.ui.confirm({
+    title:'编辑重学',bodyEl:el,okText:'保存并重学',okTone:'primary',cancelText:'取消',
+    extraNote:running?'<p style="color:var(--c-warning);font-size:12.5px;margin-top:10px">当前账号正在运行，保存后将中断任务。</p>':'',
+  });
+  if(!confirmed) return;
+  let body={requeue:true};
+  const pw=document.getElementById('ePass').value;
+  if(pw) body.password=pw;
+  if(isB()){
+    const sel=[...document.querySelectorAll('.eYear:checked')].map(i=>i.value);
+    if(!sel.length){window.ui.toast('请至少选择一个目标年度','warning');return;}
+    body.target_years=sel;
+    body.report_mode=document.querySelector('#eModeGroup [aria-pressed="true"]')?.dataset.val||'normal';
+    body.extra={...extra,remark:document.getElementById('eRemark').value.trim()};
+  }else{
+    const newReqs=[];
+    const ns1=document.getElementById('eSub1').value.trim(),nc1=parseFloat(document.getElementById('eCr1').value||'0');
+    const ns2=document.getElementById('eSub2').value.trim(),nc2=parseFloat(document.getElementById('eCr2').value||'0');
+    if(ns1) newReqs.push({category:ns1,credits:nc1});
+    if(ns2) newReqs.push({category:ns2,credits:nc2});
+    body.display_name=document.getElementById('eName').value.trim()||a.display_name;
+    body.requirements=newReqs;
+    body.extra={...extra,remark:document.getElementById('eRemark').value.trim()};
+  }
+  try{await api('PATCH',`/api/accounts/${id}`,body);window.ui.toast('已保存并重新入队','success',2000);await refresh();}
+  catch(e){window.ui.toast(e.message,'danger');}
+}
+
+async function deleteAccount(id){
+  const a=_accounts.find(x=>x.id===id);
+  const name=a?(a.display_name||a.username):'该账号';
+  if(!await window.ui.confirm({title:'确认删除',body:`将永久删除账号「${name}」及其全部运行数据（含 cookies、课表、运行记录），无法恢复。`,okText:'删除',okTone:'danger'})) return;
+  try{await api('DELETE',`/api/accounts/${id}`);window.ui.toast('已删除','info',2000);await refresh();}
+  catch(e){window.ui.toast(e.message,'danger');}
+}
+
+// ── Concurrency ───────────────────────────────────────────────────────────────
+document.getElementById('concurrencyInput').addEventListener('change',async function(){
+  const v=parseInt(this.value);
+  if(!v||v<1) return;
+  try{await api('POST','/api/scheduler/limit',{limit:v});}
+  catch(e){window.ui.toast(e.message,'danger');}
+});
+
+// ── Pause/Resume ──────────────────────────────────────────────────────────────
+document.getElementById('btnPause').onclick=async()=>{
+  try{await api('POST','/api/scheduler/pause');_paused=true;updateHeader();window.ui.toast('调度已暂停','info',2000);}
+  catch(e){window.ui.toast(e.message,'danger');}
+};
+document.getElementById('btnResume').onclick=async()=>{
+  try{await api('POST','/api/scheduler/resume');_paused=false;updateHeader();window.ui.toast('调度已恢复','success',2000);}
+  catch(e){window.ui.toast(e.message,'danger');}
+};
+
+// ── Template / Export ─────────────────────────────────────────────────────────
+document.getElementById('btnTemplate').onclick=()=>{ window.location.href='/api/template'; };
+document.getElementById('btnExport').onclick=()=>{ window.location.href='/api/export'; };
+
+// ── Drawer ────────────────────────────────────────────────────────────────────
+async function openDrawer(id){
+  const mount=document.getElementById('drawerMount');
+  mount.innerHTML=`<div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer">
+    <div class="drawer-head"><h2>账号详情</h2>
+      <button class="btn btn-ghost btn-icon" onclick="closeDrawer()" title="关闭 (Esc)">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body"><div class="spinner" style="margin:40px auto"></div></div>
+  </div>`;
+  try{
+    const a=await apiFetch(`/api/accounts/${id}`);
+    renderDrawerContent(a);
+  }catch(e){
+    document.querySelector('.drawer-body').innerHTML=`<p style="color:var(--c-danger)">加载失败：${esc(e.message)}</p>`;
+  }
+}
+function closeDrawer(){document.getElementById('drawerMount').innerHTML='';}
+
+function rechargeBlock(a){
+  if(!_config.has_recharge) return '';
+  const id=a.id;
+  return `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--c-border)">
+    <h3 style="font-size:13px;margin-bottom:10px">购卡 / 充值</h3>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+      <div class="field"><label class="field-label">卡号</label>
+        <input class="input" id="rcCard" type="text" placeholder="卡号"></div>
+      <div class="field"><label class="field-label">卡号密码</label>
+        <input class="input" id="rcCardPwd" type="password" placeholder="如有则填"></div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px" onclick="submitRecharge(${id})">提交购卡</button>
+  </div>`;
+}
+async function submitRecharge(id){
+  const card=document.getElementById('rcCard')?.value?.trim();
+  const pwd=document.getElementById('rcCardPwd')?.value||'';
+  if(!card){window.ui.toast('请填写卡号','warning');return;}
+  if(!await window.ui.confirm({title:'确认购卡',body:'将为该账号提交购卡/充值请求。',okText:'提交',okTone:'primary'})) return;
+  try{
+    const r=await api('POST',`/api/accounts/${id}/recharge`,{card_no:card,card_password:pwd});
+    window.ui.toast(r.message||'购卡请求已提交','success',2500);
+    await refresh();
+  }catch(e){window.ui.toast(e.message,'danger');}
+}
+
+function renderDrawerContent(a){
+  let extra={};
+  try{extra=JSON.parse(a.extra_json||'{}');}catch{extra={};}
+  const runs=a.runs||[];
+  const showCopy=a.status==='failed'||!!(a.error_log_text);
+  const logText=a.error_log_text||'（暂无日志内容）';
+  const copyBtn=showCopy?`<br><button class="btn btn-outline btn-sm log-copy-btn" style="margin-top:12px">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="9" height="12" rx="1.5"/><path d="M3 4H2a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-1"/></svg>复制日志
+  </button>`:'';
+
+  let infoTab='';
+  if(isB()){
+    infoTab=`<dl class="kv">
+      <dt>姓名</dt><dd>${esc(accountDisplayName(a,extra))}</dd>
+      <dt>账号</dt><dd style="font-family:var(--font-mono)">${esc(a.username)}</dd>
+      <dt>身份证</dt><dd>${esc(extra.id_card||'—')}</dd>
+      <dt>备注</dt><dd>${esc(extra.remark||'—')}</dd>
+      <dt>目标年度</dt><dd>${esc(yearSummary(a))}</dd>
+      <dt>任务模式</dt><dd>${extra.report_mode==='fast'?'快速':'标准'}</dd>
+      <dt>状态</dt><dd>${pillHtml(a.status)}</dd>
+      <dt>说明</dt><dd>${esc(a.status_msg||'—')}</dd>
+      <dt>当前阶段</dt><dd>${phaseDetailHtml(extra,a.status)}</dd>
+      <dt>重试次数</dt><dd>${a.retry_count||0}</dd>
+      <dt>创建时间</dt><dd>${fmtTs(a.created_at)}</dd>
+      <dt>更新时间</dt><dd>${fmtTs(a.updated_at)}</dd>
+    </dl>${rechargeBlock(a)}${copyBtn}`;
+  }else{
+    const reqs=JSON.parse(a.requirements_json||'[]');
+    const reqLine=reqs.map(r=>`${r.category} ${r.credits}分`).join('、')||'—';
+    infoTab=`<dl class="kv">
+      <dt>姓名</dt><dd>${esc(a.display_name||'—')}</dd>
+      <dt>账号</dt><dd style="font-family:var(--font-mono)">${esc(a.username)}</dd>
+      <dt>学科·学分</dt><dd>${esc(reqLine)}</dd>
+      <dt>状态</dt><dd>${pillHtml(a.status)}</dd>
+      <dt>说明</dt><dd>${esc(a.status_msg||'—')}</dd>
+      <dt>当前阶段</dt><dd>${phaseDetailHtml(extra,a.status)}</dd>
+      <dt>重试次数</dt><dd>${a.retry_count||0}</dd>
+      <dt>创建时间</dt><dd>${fmtTs(a.created_at)}</dd>
+      <dt>更新时间</dt><dd>${fmtTs(a.updated_at)}</dd>
+    </dl>${rechargeBlock(a)}${copyBtn}`;
+  }
+
+  const courseRows=(()=>{
+    if(isB()){
+      const ys=extra.year_status||{};
+      const years=Object.keys(ys).sort((a,b)=>b.localeCompare(a));
+      if(!years.length) return '<p style="color:var(--c-text-muted);font-size:13px">暂无年度进度</p>';
+      return years.map(yr=>{
+        const y=ys[yr]||{};
+        const pct=y.progress_percent!=null?y.progress_percent:
+          (y.required_hours>0?Math.round(100*(y.earned_hours||0)/y.required_hours):0);
+        return `<div class="year-group"><h3>${esc(yr)} 年</h3><dl class="kv">
+          <dt>要求学时</dt><dd>${y.required_hours??'—'}</dd>
+          <dt>已获得</dt><dd>${y.earned_hours??'—'}</dd>
+          <dt>进度</dt><dd>${pct}% ${y.completed?'（已完成）':''}</dd>
+          <dt>当前课程</dt><dd>${esc(y.current_course_title||extra.current_course_title||'—')}</dd>
+          <dt>当前章节</dt><dd>${esc(y.current_chapter_title||extra.current_chapter_title||'—')}${(()=>{const st=a.status;const p=st==='running'?(y.current_chapter_progress??extra.current_chapter_progress):(y.server_chapter_progress??extra.server_chapter_progress??y.current_chapter_progress??extra.current_chapter_progress);return p!=null?`（${p}%）`:'';})()}</dd>
+        </dl></div>`;
+      }).join('');
+    }
+    try{
+      const results=extra[Object.keys(extra).find(k=>k.endsWith('_results'))||'']||[];
+      if(!results.length) return '<p style="color:var(--c-text-muted);font-size:13px">暂无课程数据</p>';
+      return results.sort((x,y)=>(x.queue_rank||0)-(y.queue_rank||0))
+        .map(c=>`<div class="run-item">
+          <div class="run-top">${pillHtml(c.state||'queued')}<span>${esc(c.project_name||c.project_id||'')}</span></div>
+          <div class="run-summary">${c.subject_label?esc(c.subject_label)+' · ':''} ${c.credits||0} 学分</div>
+        </div>`).join('');
+    }catch{return '<p style="color:var(--c-text-muted);font-size:13px">暂无数据</p>';}
+  })();
+
+  const applyRows=(()=>{
+    const tasks=a.apply_tasks||[];
+    if(!tasks.length) return '<p style="color:var(--c-text-muted);font-size:13px">暂无申请任务</p>';
+    return tasks.map(t=>`<div class="run-item">
+      <div class="run-top">${pillHtml(t.status==='succeeded'?'completed':t.status==='dead'?'failed':'queued')}
+        <span>${esc(t.project_name||t.project_id)}</span></div>
+      <div class="run-summary">${esc(t.subject_label||'')} ${t.credits||''} 学分 · 尝试 ${t.attempts||0} 次</div>
+      ${t.last_error?`<div class="run-summary" style="color:var(--c-danger)">${esc(t.last_error)}</div>`:''}
+    </div>`).join('');
+  })();
+
+  const historyRows=runs.length?runs.map(r=>`<div class="run-item">
+    <div class="run-top"><span class="pill" data-tone="${r.result==='success'?'completed':'failed'}"><span class="dot"></span>${r.result==='success'?'成功':'失败'}</span>
+    <span class="run-time">${fmtTs(r.started_at)}</span></div>
+    ${r.summary?`<div class="run-summary">${esc(r.summary)}</div>`:''}
+    <details><summary>展开日志</summary><pre>${esc(JSON.stringify(JSON.parse(r.logs_json||'[]'),null,2))}</pre></details>
+  </div>`).join(''):'<p style="color:var(--c-text-muted);font-size:13px">暂无运行历史</p>';
+
+  const applyTab=_config.has_credit_apply
+    ?`<button aria-selected="false" onclick="switchTab(this,'tab-apply')">申请队列</button>`:'';
+  const applyPane=_config.has_credit_apply
+    ?`<div id="tab-apply" class="tab-pane">${applyRows}</div>`:'';
+
+  document.querySelector('.drawer-body').innerHTML=`
+    <div class="tabs-nav">
+      <button aria-selected="true" onclick="switchTab(this,'tab-info')">基本信息</button>
+      <button aria-selected="false" onclick="switchTab(this,'tab-course')">${isB()?'年度进度':'课程进度'}</button>
+      ${applyTab}
+      <button aria-selected="false" onclick="switchTab(this,'tab-history')">运行历史</button>
+    </div>
+    <div id="tab-info" class="tab-pane active">${infoTab}</div>
+    <div id="tab-course" class="tab-pane">${courseRows}</div>
+    ${applyPane}
+    <div id="tab-history" class="tab-pane">${historyRows}</div>`;
+  const copyBtnEl=document.querySelector('.log-copy-btn');
+  if(copyBtnEl) copyBtnEl.addEventListener('click',()=>copyErrLog(logText));
+}
+function switchTab(btn,paneId){
+  btn.closest('.tabs-nav').querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected','false'));
+  btn.setAttribute('aria-selected','true');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById(paneId).classList.add('active');
+}
+async function copyErrLog(text){
+  try{await navigator.clipboard.writeText(text); window.ui.toast('已复制到剪贴板','success',2000);}
+  catch{
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); window.ui.toast('已复制到剪贴板','success',2000);
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+window.ui={
+  toast(msg,tone='info',ms=3500){
+    const el=document.createElement('div');
+    el.className='toast'; el.dataset.tone=tone;
+    const icons={success:'<path d="M13 4L6 11 3 8" stroke-width="1.8"/>',warning:'<path d="M8 4v5M8 11v1.5" stroke-width="1.8"/>',danger:'<path d="M10 6L6 10M6 6l4 4" stroke-width="1.8"/>',info:'<path d="M8 7v4M8 4v1" stroke-width="1.8"/>'};
+    el.innerHTML=`<span class="t-accent"></span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" style="flex-shrink:0;color:var(--c-${tone==='danger'?'danger':tone==='success'?'success':tone==='warning'?'warning':'info'})">${icons[tone]||''}</svg>
+      <span class="t-msg">${esc(msg)}</span>
+      <button class="t-close" onclick="this.closest('.toast').remove()">✕</button>`;
+    const stack=document.getElementById('toastStack');
+    stack.appendChild(el);
+    if(ms>0) setTimeout(()=>{el.style.animation='toastIn .12s ease reverse'; setTimeout(()=>el.remove(),110);},ms);
+  },
+  confirm({title,body,bodyEl,okText='确认',okTone='primary',cancelText='取消',extraNote=''}){
+    return new Promise(resolve=>{
+      const mount=document.getElementById('modalMount');
+      mount.innerHTML=`<div class="modal-backdrop" onclick="closeModal(false)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-head"><h2>${esc(title)}</h2>
+            <button class="btn btn-ghost btn-icon" onclick="closeModal(false)"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+          </div>
+          <div class="modal-body">
+            <p>${esc(body||'')}</p>${extraNote||''}
+            <div id="modalBodyEl"></div>
+          </div>
+          <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeModal(false)">${esc(cancelText)}</button>
+            <button class="btn btn-${okTone}" id="modalOkBtn" autofocus onclick="closeModal(true)">${esc(okText)}</button>
+          </div>
+        </div>
+      </div>`;
+      if(bodyEl) document.getElementById('modalBodyEl').appendChild(bodyEl);
+      window._resolveModal=resolve;
+    });
+  }
+};
+window.closeModal=function(ok){
+  document.getElementById('modalMount').innerHTML='';
+  if(window._resolveModal){window._resolveModal(ok);window._resolveModal=null;}
+};
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+const THEMES=['','light','dark'];
+let _themeIdx=()=>THEMES.indexOf(localStorage.getItem('theme')||'');
+function applyTheme(t){
+  if(t) document.documentElement.dataset.theme=t;
+  else delete document.documentElement.dataset.theme;
+  localStorage.setItem('theme',t||'');
+  const icon=document.getElementById('themeIcon');
+  // sun / moon / system icon
+  if(t==='dark') icon.innerHTML='<path d="M12.5 8A4.5 4.5 0 014 5c0 3.5 2.5 6 6 6a4.5 4.5 0 002.5-.7" stroke-width="1.6" stroke-linecap="round"/>';
+  else if(t==='light') icon.innerHTML='<circle cx="8" cy="8" r="3.5" stroke-width="1.6"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.05 1.05M11.85 11.85l1.05 1.05M3.1 12.9l1.05-1.05M11.85 4.15l1.05-1.05" stroke-width="1.6" stroke-linecap="round"/>';
+  else icon.innerHTML='<circle cx="8" cy="8" r="5" stroke-width="1.6"/><path d="M8 3v1M8 12v1M3 8H4M12 8h1M4.9 4.9l.7.7M10.4 10.4l.7.7M4.9 11.1l.7-.7M10.4 5.6l.7-.7" stroke-width="1.6" stroke-linecap="round"/>';
+}
+document.getElementById('btnTheme').onclick=()=>{
+  const idx=(_themeIdx()+1)%THEMES.length;
+  applyTheme(THEMES[idx]);
+};
+applyTheme(localStorage.getItem('theme')||'');
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  const inInput=['INPUT','TEXTAREA','SELECT'].includes(tag);
+  if(e.key==='Escape'){
+    if(document.querySelector('.drawer')) closeDrawer();
+    else if(document.querySelector('.modal-backdrop')) closeModal(false);
+    else if(inInput) e.target.blur();
+    return;
+  }
+  if(inInput) return;
+  if(e.key==='/' ){e.preventDefault();document.getElementById('searchInput').focus();}
+  else if(e.key==='n'||e.key==='N'){e.preventDefault();document.getElementById('addPanel').dataset.open='true';focusAddField();}
+  else if(e.key===' '){e.preventDefault();if(_paused)document.getElementById('btnResume').click();else document.getElementById('btnPause').click();}
+  else if(e.key==='t'||e.key==='T'){document.getElementById('btnTheme').click();}
+  else if(e.key==='?'){showShortcutHelp();}
+});
+
+function showShortcutHelp(){
+  const rows=[['/',  '聚焦搜索框'],['N','跳到添加表单'],['Space','暂停 / 恢复'],['T','切换主题'],['Esc','关闭弹窗 / 抽屉'],['?','此帮助']];
+  window.ui.confirm({
+    title:'快捷键',
+    body:'<table style="border-collapse:collapse;width:100%;font-size:13px">'
+      +rows.map(r=>`<tr><td style="padding:5px 10px 5px 0"><kbd>${esc(r[0])}</kbd></td><td style="padding:5px 0;color:var(--c-text-soft)">${esc(r[1])}</td></tr>`).join('')
+      +'</table>',
+    okText:'关闭',cancelText:'',
+  });
+}
+
+function fmtTs(ts){if(!ts)return '—';const d=new Date(ts*1000);return d.toLocaleDateString('zh-CN')+' '+d.toTimeString().slice(0,8);}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function boot(){
+  try{_config=await apiFetch('/api/config');}catch(e){}
+  applyLayout();
+  initYearPills();
+  await refresh();
+  startPolling();
+}
+boot();
+
+// 内联 onclick/oninput 在全局作用域执行，须挂到 window
+Object.assign(window,{
+  openDrawer,closeDrawer,switchTab,submitRecharge,
+  requeueAccount,editRequeue,deleteAccount,
+  filterByStatus,setFilter,debounceSearch,togglePanel,
+  selectMode,goPageDelta,changePageSize,
+});
+
+})();
+</script>
+</body>
+</html>
