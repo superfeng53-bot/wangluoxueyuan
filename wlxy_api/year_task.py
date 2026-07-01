@@ -238,7 +238,6 @@ class YearTaskRunner:
 
         pending_exams = self.exams.list_my_exams(exam_type=1)
         exam_required = bool(pending_exams)
-        exam_cleared = not exam_required
         if exam_required:
             logs.append(StageLog("exam", False, f"仍有 {len(pending_exams)} 场待考"))
             return YearTaskResult(

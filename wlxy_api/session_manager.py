@@ -9,8 +9,6 @@ from pathlib import Path
 from .captcha_limiter import (
     format_cooldown_message,
     get_cooldown_remaining,
-    is_captcha_rate_limited,
-    report_rate_limited,
 )
 from .client import HttpClient
 from .config import DEFAULT_COOKIES_FILE, DEFAULT_USER_PROFILE_FILE

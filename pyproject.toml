@@ -1,0 +1,29 @@
+[project]
+name = "wangluoxueyuan"
+version = "0.1.0"
+description = "成都职业培训网络学院自动化学习客户端（B 型公需年度）"
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.31",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pydantic>=2.5",
+    "ddddocr>=1.4.11",
+    "pycryptodome>=3.20",
+    "pillow>=10.0",
+    "openpyxl>=3.1",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "tzdata>=2024.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/superfeng53-bot/wangluoxueyuan"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]
