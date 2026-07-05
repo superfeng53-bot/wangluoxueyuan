@@ -99,15 +99,24 @@ def resolve_credentials_from_row(
     password: str,
     combined: str = "",
 ) -> tuple[str, str]:
-    """从分列或一栏列解析账号密码；分列均有值时优先分列。"""
+    """从分列或一栏列解析账号密码。
+
+    「账号密码」列非空时优先解析（combined 模板示例不在分列留占位符，避免只改一栏仍读到旧分列值）。
+    """
     user = (username or "").strip()
     pwd = (password or "").strip()
     comb = (combined or "").strip()
+    if comb:
+        try:
+            parsed = parse_combined_credentials(comb)
+            if parsed.username:
+                return parsed.username, parsed.password
+        except CredentialParseError:
+            if user and pwd:
+                return user, pwd
+            raise
     if user and pwd:
         return user, pwd
-    if comb:
-        parsed = parse_combined_credentials(comb)
-        return parsed.username, parsed.password
     if user or pwd:
         raise CredentialParseError("账号和密码须同时填写，或改填「账号密码」一栏")
     raise CredentialParseError("账号和密码不能均为空")

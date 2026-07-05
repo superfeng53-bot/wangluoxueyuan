@@ -21,4 +21,4 @@ PLATFORM_CN = "成都职业培训网络学院"
 LOGO_LETTER = "网"
 
 # 凭证输入：split=账号+密码两栏 | combined=一栏粘贴（见 data/account.json）
-CREDENTIAL_INPUT_MODE = "split"
+CREDENTIAL_INPUT_MODE = "combined"

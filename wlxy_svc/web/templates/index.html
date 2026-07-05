@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-site-profile="__SITE_PROFILE__" data-credential-mode="__CREDENTIAL_INPUT_MODE__">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<script>window.__BOOT_CONFIG__=__BOOT_CONFIG_JSON__;</script>
 <title>成都职业培训网络学院 自动化控制台</title>
 <style>
 /* ── Design Tokens ─────────────────────────────────────────────────────────── */
@@ -111,7 +113,12 @@ a{color:var(--c-primary);text-decoration:none}
 .input:focus{border-color:var(--c-primary);background:var(--c-surface);box-shadow:0 0 0 3px var(--c-primary-dim)}
 .input::placeholder{color:var(--c-text-muted)}
 textarea.input.credential-textarea{min-height:72px;resize:vertical;font-family:var(--font-mono);font-size:13px;line-height:1.5}
+html[data-credential-mode="combined"] .field-credential-combined{display:flex}
+html[data-credential-mode="combined"] .field-credential-split{display:none!important}
+html[data-credential-mode="split"] .field-credential-combined{display:none!important}
+html[data-credential-mode="split"] .field-credential-split{display:flex}
 .field-credential-combined{display:none}
+.field-credential-split{display:flex}
 .field-hint{display:block;margin-top:5px;font-size:12px;color:var(--c-text-muted);line-height:1.45}
 .input:focus-visible{outline:none}
 .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
@@ -349,8 +356,8 @@ details pre{margin-top:6px;font-size:11.5px;font-family:var(--font-mono);backgro
     </div>
     <div class="panel-body">
       <form id="addForm" onsubmit="submitAddForm(event)">
-        <div class="form-grid" id="addFormA">
-          <div class="field field-credential-combined" id="fCredentialWrapA" style="grid-column:1/-1">
+        <div class="form-grid" id="addFormA" style="display:__ADD_FORM_A_DISPLAY__">
+          <div class="field field-credential-combined" id="fCredentialWrapA" style="display:__CREDENTIAL_COMBINED_DISPLAY__;grid-column:1/-1">
             <label class="field-label" for="fCredentialA">账号密码 <span class="req">*</span></label>
             <textarea class="input credential-textarea" id="fCredentialA" rows="2" placeholder="粘贴一行或两行，如：zhangsan mima123&#10;或：账号：zhangsan  密码：mima123" autocomplete="off"></textarea>
             <span class="field-hint">支持：账号/密码、登录名/口令、手机号、帐号/帐户、是/为/等号/括号、【标签】、多行、账号|user|密码|pass 等格式</span>
@@ -359,11 +366,11 @@ details pre{margin-top:6px;font-size:11.5px;font-family:var(--font-mono);backgro
             <label class="field-label" for="fName">姓名 <span class="req">*</span></label>
             <input class="input" id="fName" type="text" placeholder="真实姓名" autocomplete="off">
           </div>
-          <div class="field field-credential-split" id="fUserFieldA">
+          <div class="field field-credential-split" id="fUserFieldA" style="display:__CREDENTIAL_SPLIT_DISPLAY__">
             <label class="field-label" for="fUser">账号 <span class="req">*</span></label>
             <input class="input" id="fUser" type="text" placeholder="登录账号" autocomplete="off">
           </div>
-          <div class="field field-credential-split" id="fPassWrapA">
+          <div class="field field-credential-split" id="fPassWrapA" style="display:__CREDENTIAL_SPLIT_DISPLAY__">
             <label class="field-label" for="fPass">密码 <span class="req">*</span></label>
             <input class="input" id="fPass" type="password" placeholder="登录密码" autocomplete="off">
           </div>
@@ -372,17 +379,17 @@ details pre{margin-top:6px;font-size:11.5px;font-family:var(--font-mono);backgro
             <input class="input" id="fRemark" type="text" placeholder="可选备注">
           </div>
         </div>
-        <div class="form-grid" id="addFormB" style="display:none">
-          <div class="field field-credential-combined" id="fCredentialWrapB" style="grid-column:1/-1">
+        <div class="form-grid" id="addFormB" style="display:__ADD_FORM_B_DISPLAY__">
+          <div class="field field-credential-combined" id="fCredentialWrapB" style="display:__CREDENTIAL_COMBINED_DISPLAY__;grid-column:1/-1">
             <label class="field-label" for="fCredentialB">账号密码 <span class="req">*</span></label>
-            <textarea class="input credential-textarea" id="fCredentialB" rows="2" placeholder="粘贴一行或两行，如：zhangsan mima123&#10;或：账号：zhangsan  密码：mima123" autocomplete="off"></textarea>
+            <textarea class="input credential-textarea" id="fCredentialB" rows="2" placeholder="粘贴一行，如：zhangsan mima123&#10;或：账号 zhangsan  密码 mima123" autocomplete="off"></textarea>
             <span class="field-hint">支持：账号/密码、登录名/口令、手机号、帐号/帐户、是/为/等号/括号、【标签】、多行、账号|user|密码|pass 等格式</span>
           </div>
-          <div class="field field-credential-split" id="fUserWrapB">
+          <div class="field field-credential-split" id="fUserWrapB" style="display:__CREDENTIAL_SPLIT_DISPLAY__">
             <label class="field-label" for="fUserB">账号 <span class="req">*</span></label>
             <input class="input" id="fUserB" type="text" placeholder="登录账号" autocomplete="off">
           </div>
-          <div class="field field-credential-split" id="fPassWrapB">
+          <div class="field field-credential-split" id="fPassWrapB" style="display:__CREDENTIAL_SPLIT_DISPLAY__">
             <label class="field-label" for="fPassB">密码 <span class="req">*</span></label>
             <input class="input" id="fPassB" type="password" placeholder="登录密码" autocomplete="off">
           </div>
@@ -520,7 +527,7 @@ details pre{margin-top:6px;font-size:11.5px;font-family:var(--font-mono);backgro
 let _accounts=[], _filter='', _search='', _paused=false, _concurrency=400;
 let _page=1, _pageSize=50, _filteredTotal=0;
 let _inflight=false, _pollTimer=null;
-let _config={site_profile:'A',has_credit_apply:false,has_subjects:true,has_recharge:false,credential_input_mode:'split'};
+let _config=window.__BOOT_CONFIG__||{site_profile:'B',has_credit_apply:false,has_subjects:false,has_recharge:false,credential_input_mode:'combined'};
 const STATUS_LABEL={  queued:'排队',running:'进行中',waiting_apply:'等待申请',
   completed:'已完成',failed:'失败',paused:'已暂停'};
 const isB=()=>_config.site_profile==='B';
@@ -854,11 +861,12 @@ function cardHtml(a){
 
 function applyCredentialInputLayout(){
   const combined=isCombinedCred();
+  document.documentElement.dataset.credentialMode=combined?'combined':'split';
   ['A','B'].forEach(s=>{
     const wrap=document.getElementById('fCredentialWrap'+s);
-    if(wrap) wrap.style.display=combined?'block':'none';
+    if(wrap) wrap.style.display=combined?'flex':'none';
     document.querySelectorAll('#addForm'+s+' .field-credential-split').forEach(el=>{
-      el.style.display=combined?'none':'block';
+      el.style.display=combined?'none':'flex';
     });
   });
 }
@@ -875,10 +883,16 @@ function applyLayout(){
   document.getElementById('addFormA').style.display=b?'none':'';
   document.getElementById('addFormB').style.display=b?'':'none';
   applyCredentialInputLayout();
-  const credHint=isCombinedCred()?'；可填「账号密码」一栏或分列':'';
+  const credHint=isCombinedCred()
+    ?'；推荐填「账号密码」一栏（也支持分列账号/密码）'
+    :'';
   document.getElementById('uploadHint').textContent=b
-    ?`仅支持 .xlsx；表头须为中文（账号/密码/目标年度…${credHint}）`
-    :`仅支持 .xlsx；表头须为中文（姓名/账号/密码…${credHint}）`;
+    ?(isCombinedCred()
+      ?`仅支持 .xlsx；表头须为中文（账号密码/账号/密码/目标年度…${credHint}）`
+      :`仅支持 .xlsx；表头须为中文（账号/密码/目标年度…${credHint}）`)
+    :(isCombinedCred()
+      ?`仅支持 .xlsx；表头须为中文（姓名/账号密码/账号/密码…${credHint}）`
+      :`仅支持 .xlsx；表头须为中文（姓名/账号/密码…${credHint}）`);
   const waitTile=document.getElementById('tileWaitApply');
   const waitFilter=document.getElementById('filterWaitApply');
   const showWait=!!_config.has_credit_apply;
@@ -1501,6 +1515,10 @@ function showShortcutHelp(){
 function fmtTs(ts){if(!ts)return '—';const d=new Date(ts*1000);return d.toLocaleDateString('zh-CN')+' '+d.toTimeString().slice(0,8);}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+// B 型 + combined 默认布局（boot 拉 /api/config 前即生效，避免先闪分列表单）
+document.documentElement.dataset.credentialMode='combined';
+applyLayout();
+
 async function boot(){
   try{_config=await apiFetch('/api/config');}catch(e){}
   applyLayout();
@@ -1516,6 +1534,7 @@ Object.assign(window,{
   requeueAccount,editRequeue,deleteAccount,
   filterByStatus,setFilter,debounceSearch,togglePanel,
   selectMode,goPageDelta,changePageSize,
+  submitAddForm,dragOver,dragLeave,dropFile,uploadFile,
 });
 
 })();

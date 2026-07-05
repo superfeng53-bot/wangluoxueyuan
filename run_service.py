@@ -27,7 +27,7 @@ from wlxy_svc.web.app import app
 from wlxy_svc.worker import AccountWorker
 
 DEFAULT_PORT = SERVICE_PORT
-CREDENTIAL_INPUT_MODE = "split"  # 回退默认；优先读 data/account.json
+CREDENTIAL_INPUT_MODE = "combined"  # 回退默认；优先读 data/account.json
 HAS_CREDIT_APPLY = False
 HAS_RECHARGE = False
 

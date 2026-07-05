@@ -97,14 +97,17 @@ def _resolve_credentials(
     user = (username or "").strip()
     pwd = (password or "").strip()
     combined = (credentials_combined or "").strip()
-    if user and pwd:
-        return user, pwd
     if combined:
         try:
             parsed = parse_combined_credentials(combined)
+            if parsed.username:
+                return parsed.username, parsed.password
         except CredentialParseError as exc:
+            if user and pwd:
+                return user, pwd
             raise HTTPException(400, detail=str(exc)) from exc
-        return parsed.username, parsed.password
+    if user and pwd:
+        return user, pwd
     if _credential_input_mode(request) == "combined":
         raise HTTPException(400, detail="请输入账号密码（一栏粘贴）")
     raise HTTPException(400, detail="账号和密码为必填")
@@ -137,9 +140,47 @@ def _safe_account(d: dict, store=None, *, include_error_log: bool = True) -> dic
 
 # ── 页面 ──────────────────────────────────────────────────────────────────────
 
+def _render_index_html(request: Request) -> str:
+    """按运行时配置渲染 index.html，避免浏览器缓存或 JS 未执行时仍显示分列表单。"""
+    raw = (_TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
+    profile = _site_profile(request)
+    mode = _credential_input_mode(request)
+    combined = mode == "combined"
+    is_b = profile == "B"
+    repl = {
+        "__SITE_PROFILE__": profile,
+        "__CREDENTIAL_INPUT_MODE__": mode,
+        "__ADD_FORM_A_DISPLAY__": "none" if is_b else "grid",
+        "__ADD_FORM_B_DISPLAY__": "grid" if is_b else "none",
+        "__CREDENTIAL_COMBINED_DISPLAY__": "flex" if combined else "none",
+        "__CREDENTIAL_SPLIT_DISPLAY__": "none" if combined else "flex",
+        "__BOOT_CONFIG_JSON__": json.dumps(
+            {
+                "platform": PLATFORM,
+                "site_profile": profile,
+                "has_credit_apply": _has_credit_apply(request),
+                "has_subjects": profile == "A",
+                "has_recharge": bool(getattr(request.app.state, "has_recharge", False)),
+                "credential_input_mode": mode,
+            },
+            ensure_ascii=False,
+        ),
+    }
+    for key, val in repl.items():
+        raw = raw.replace(key, val)
+    return raw
+
+
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    return FileResponse(_TEMPLATES_DIR / "index.html", media_type="text/html; charset=utf-8")
+async def index(request: Request):
+    html = _render_index_html(request)
+    return HTMLResponse(
+        html,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+            "Pragma": "no-cache",
+        },
+    )
 
 
 # ── 配置（前端 A/B 型与能力开关）──────────────────────────────────────────────
