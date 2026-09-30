@@ -26,16 +26,24 @@ API 域名：`https://api.cdwork.cn`
 | URL | `https://api.cdwork.cn/user/user/user_login` |
 | Content-Type | `application/x-www-form-urlencoded` |
 
+> **2026 年接口升级（已验证）**：不再接受明文 `phone`/`password` 字段
+> （旧方式返回 `8602 登录参数不能为空!`）。前端改为国密加密参数：
+
 ### 请求字段
 
-| 字段 | 说明 | 示例 |
-|---|---|---|
-| `phone` | 手机号或身份证号 | `513902198610090789` |
-| `password` | 明文密码的 **MD5 大写** | `B63CDF08803D69F72715527B1ED1FF5A` |
-| `device` | 固定 `2`（Web） | `2` |
-| `hierarchy` | 站点层级码 | `A1-1-1-1-` |
+| 字段 | 说明 |
+|---|---|
+| `cipherData` | SM2 加密（公钥见下，mode=C1C3C2，hex 带 `04` 前缀）的 `{"phone":手机号,"password":MD5大写,"isAdmin":1}` |
+| `signature` | `HMAC-SM3(key=e29544dd73f460f73611dfbc0bc757dc(hex解码), msg=phone+MD5大写)` |
+| `device` | 固定 `2`（Web） |
+| `hierarchy` | 站点层级码 `A1-1-1-1-`（必带，否则报 `站点层级不能为空!`） |
+
+SM2 公钥（前端 JS 内固定）：
+`04eea86cf0ed72c612ef945320ac127cb28749c20117ed682c4d1072aaf42eca6d8176ce1200cc0f15150c94f97f0160cff62c56d9eb5783a0f4f18042f726bd8f`
 
 密码哈希：`md5(utf8_password).hexdigest().upper()`
+实现见 `wlxy_api/login.py` 的 `build_login_payload()`（依赖 `gmssl`）。
+错误码：`8601 数据校验失败!` = signature 不匹配；`8602 登录参数不能为空!` = 字段缺失/用了旧字段。
 
 ## 3. 成功响应
 

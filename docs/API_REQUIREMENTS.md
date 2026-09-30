@@ -35,7 +35,12 @@
 - 年度完成：`my_train.progress >= 1.0` 或 `state == 3`（已观测）
 - 购课策略 `not_purchased_policy`：`fail`（未报名年度不在 `my_train` 列表）
 - `report_mode`：标准 / 快速（Phase 4 调上报间隔；默认标准约 15s）
-- 学习上报：`start_training` 进入章节 → 循环 `start_learning` 递增 `studyLength`
+- 学习上报：`start_training` 进入章节 → 循环 `start_learning_socket` 递增 `currentTimes`
+- **章节完成判定（2026-09 实测）**：服务端 `progress` 按**整百分比量化**（0.95→0.96），
+  ≥95% ≠ 完成；只有上报到视频结尾并发送 `playStatus="end"` 才会翻转 `state=3`。
+  因此完成/跳过判定只能看 `state==3`（`finished`），不能看 progress 阈值。
+  入账有 3-5s 延迟，上报后立即刷新课表会读出假阴性；新会话前 ~13s 不计学时。
+- 登录（2026 起）：`cipherData`(SM2) + `signature`(HMAC-SM3)，见 LOGIN_FLOW.md 第 2 节
 - 证书/达标：以培训记录进度为准；`query_userinfo_progress` 为账号级辅助字段
 
 ## Phase 2 Domain Plan

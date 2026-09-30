@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -8,9 +9,57 @@ from .captcha_limiter import is_captcha_rate_limited, report_rate_limited
 from .client import HttpClient
 from .config import DEFAULT_HIERARCHY, TOKEN_COOKIE_KEY
 
+# 2026 起登录接口升级为国密加密（见 docs/LOGIN_FLOW.md 第 2 节）：
+# cipherData = SM2({phone, password: md5大写, isAdmin: 1})，mode=C1C3C2
+# signature  = HMAC-SM3(key=SM3_KEY_HEX, msg=phone + md5大写)
+SM2_PUBLIC_KEY = (
+    "04eea86cf0ed72c612ef945320ac127cb28749c20117ed682c4d1072aaf42ec"
+    "a6d8176ce1200cc0f15150c94f97f0160cff62c56d9eb5783a0f4f18042f726bd8f"
+)
+SM3_HMAC_KEY_HEX = "e29544dd73f460f73611dfbc0bc757dc"
+
 
 def md5_password(password: str) -> str:
     return hashlib.md5(password.encode("utf-8")).hexdigest().upper()
+
+
+def _sm3_hex(data: bytes) -> str:
+    from gmssl import func
+    from gmssl.sm3 import sm3_hash
+
+    return sm3_hash(func.bytes_to_list(data))
+
+
+def hmac_sm3(key: bytes, msg: bytes) -> str:
+    block = 64
+    k = key if len(key) <= block else bytes.fromhex(_sm3_hex(key))
+    k = k.ljust(block, b"\x00")
+    inner = bytes(b ^ 0x36 for b in k)
+    outer = bytes(b ^ 0x5C for b in k)
+    return _sm3_hex(outer + bytes.fromhex(_sm3_hex(inner + msg)))
+
+
+def sm2_encrypt_hex(plaintext: bytes) -> str:
+    from gmssl import sm2
+
+    crypt = sm2.CryptSM2(private_key="", public_key=SM2_PUBLIC_KEY, mode=1)
+    return "04" + crypt.encrypt(plaintext).hex()
+
+
+def build_login_payload(phone: str, password: str, hierarchy: str) -> dict[str, Any]:
+    md5pwd = md5_password(password)
+    plain = json.dumps(
+        {"phone": phone, "password": md5pwd, "isAdmin": 1},
+        separators=(",", ":"),
+    )
+    return {
+        "cipherData": sm2_encrypt_hex(plain.encode("utf-8")),
+        "signature": hmac_sm3(
+            bytes.fromhex(SM3_HMAC_KEY_HEX), (phone + md5pwd).encode("utf-8")
+        ),
+        "device": "2",
+        "hierarchy": hierarchy,
+    }
 
 
 @dataclass
@@ -43,12 +92,9 @@ class LoginService:
         return mapping.get(text, "")
 
     def login(self, username: str, password: str) -> LoginResult:
-        payload = {
-            "phone": username,
-            "password": md5_password(password),
-            "device": self.client.device,
-            "hierarchy": self.client.hierarchy or DEFAULT_HIERARCHY,
-        }
+        payload = build_login_payload(
+            username, password, self.client.hierarchy or DEFAULT_HIERARCHY
+        )
         try:
             resp = self.client.api_form_post_safe(self.LOGIN_PATH, payload)
         except Exception as exc:

@@ -10,3 +10,8 @@ data/
 !data/.gitkeep
 *.log
 .DS_Store
+
+# WorkBuddy 工作区数据与临时调试脚本
+.workbuddy/
+_probe_*.py
+_diag_*.py

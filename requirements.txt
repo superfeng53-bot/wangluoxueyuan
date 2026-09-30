@@ -9,3 +9,4 @@ openpyxl>=3.1
 jinja2>=3.1
 python-multipart>=0.0.9
 tzdata>=2024.1
+gmssl>=2.5.4

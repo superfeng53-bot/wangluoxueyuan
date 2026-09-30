@@ -36,6 +36,9 @@ def _resolve_auth(args: argparse.Namespace) -> tuple[str, str, dict[str, str] | 
 
     if args.cookies:
         cookies = json.loads(Path(args.cookies).read_text(encoding="utf-8"))
+    elif args.username and args.password:
+        # -u/-p 优先于 --account（--account 有默认值，否则会永远抢占）
+        username, password = args.username, args.password
     elif args.account:
         cfg = json.loads(Path(args.account).read_text(encoding="utf-8"))
         username, password = cfg["username"], cfg["password"]
@@ -44,8 +47,6 @@ def _resolve_auth(args: argparse.Namespace) -> tuple[str, str, dict[str, str] | 
                 cookies = json.loads(DEFAULT_COOKIES_FILE.read_text(encoding="utf-8"))
             except Exception:
                 cookies = None
-    elif args.username and args.password:
-        username, password = args.username, args.password
     else:
         sys.exit("需要 --cookies / --account / -u 与 -p 之一")
 

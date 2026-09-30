@@ -94,6 +94,20 @@ class YearTaskRunner:
                 return record, chapter
         return None
 
+    def _first_probeable_chapter(self, year: int) -> tuple[YearTrainRecord, TrainChapter] | None:
+        """探针专用：挑进度 <90% 的待学章节。
+
+        服务端 progress 按整百分比量化，接近完成的章节在 60s 探针内
+        增量可能为 0（假阴性），所以探针只用于还有增长空间的章节。
+        """
+        record = self.trains.get_year_record(year)
+        if record is None:
+            return None
+        for chapter in self.trains.list_year_chapters(year):
+            if not chapter.finished and chapter.progress < 0.9:
+                return record, chapter
+        return None
+
     def probe_progress(
         self,
         year: int | str,
@@ -104,7 +118,7 @@ class YearTaskRunner:
     ) -> ProgressProbeResult:
         year_value = int(str(year).strip())
         result = ProgressProbeResult(ok=False, year=year_value, probe_seconds=probe_seconds)
-        pair = self._first_pending_chapter(year_value)
+        pair = self._first_probeable_chapter(year_value)
         if pair is None:
             record = self.trains.get_year_record(year_value)
             if record is None:
@@ -112,6 +126,12 @@ class YearTaskRunner:
             elif record.completed:
                 result.ok = True
                 result.logs.append(StageLog("probe", True, f"{year_value} 年度已完成，跳过探针"))
+            elif self._first_pending_chapter(year_value) is not None:
+                # 有待学章节但都 ≥90%：探针量化误差大，跳过探针直接跑课
+                result.ok = True
+                result.logs.append(
+                    StageLog("probe", True, "待学章节均接近完成（≥90%），跳过探针")
+                )
             else:
                 result.error = f"{year_value} 年度无待学章节"
             return result

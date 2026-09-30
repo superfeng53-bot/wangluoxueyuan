@@ -219,10 +219,13 @@ class StudyService:
         duration = chapter.total_length or 1
         _, org_id, current = self.begin_chapter_session(record, chapter)
         refreshed = self._refresh_chapter(record, chapter)
-        if self._chapter_meets_threshold(refreshed or chapter):
+        # 注意：只能以 state=3（finished）判定完成。服务端 progress 按整百分比
+        # 量化，≥95% 不等于完成——只有上报到结尾并发送 playStatus="end" 才会
+        # 翻转 state。曾因 ≥95% 直接跳过导致章节永远完不成。
+        if refreshed and refreshed.finished:
             return StudyReportResult(
                 ok=True,
-                study_length=(refreshed or chapter).study_seconds,
+                study_length=refreshed.study_seconds,
                 message="章节已完成，跳过",
             )
 
@@ -236,11 +239,13 @@ class StudyService:
 
         while True:
             refreshed = self._refresh_chapter(record, chapter)
-            if self._chapter_meets_threshold(refreshed):
+            # 同样只在 state=3 时提前收尾；≥95% 未完成时继续上报到结尾，
+            # 由下方 current>=duration 分支在视频末尾发送 end。
+            if refreshed and refreshed.finished:
                 end = self.report_socket_progress(
                     chapter,
                     org_id,
-                    max(current, (refreshed or chapter).study_seconds),
+                    max(current, refreshed.study_seconds),
                     play_status="end",
                 )
                 return end if end.ok else last
@@ -334,8 +339,17 @@ class StudyService:
                 result.error = report.message or "socket 上报失败"
                 return result
 
-        refreshed = self._refresh_chapter(record, chapter)
-        after = refreshed.study_seconds if refreshed else current
+        # 服务端入账有数秒延迟（实测 3-5s），立即刷新会读出 delta=0 的假阴性，
+        # 这里短轮询等待入账后再判定。
+        refreshed = None
+        after = before
+        poll_deadline = time.monotonic() + 15.0
+        while True:
+            refreshed = self._refresh_chapter(record, chapter)
+            after = refreshed.study_seconds if refreshed else current
+            if after - before >= min_delta or time.monotonic() >= poll_deadline:
+                break
+            time.sleep(3.0)
         result.study_seconds_after = after
         result.delta = after - before
         result.ok = result.delta >= min_delta

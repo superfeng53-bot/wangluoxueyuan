@@ -40,7 +40,8 @@ class CredentialParseError(ValueError):
 def _clean_value(val: str) -> str:
     v = (val or "").strip().strip("\"'""''")
     v = re.sub(rf"^{_BRACKET_OPEN}+|{_BRACKET_CLOSE}+$", "", v)
-    return v.strip().strip("，,;；.")
+    # 只剥中文/列举分隔符；勿剥 ASCII「.」——密码里常见（如 Zjl871118.）
+    return v.strip().strip("，,;；")
 
 
 def _normalize_spaces(text: str) -> str:
@@ -165,6 +166,35 @@ def _try_pipe_four(inline: str) -> ParsedCredentials | None:
     return None
 
 
+def _try_trailing_password_label(inline: str) -> ParsedCredentials | None:
+    """仅密码标签：手机号 密码：xxx / 手机号密码：xxx / 手机号 密码xxx。
+
+    聊天/Excel 常漏写「账号」标签，只写手机号 +「密码」。
+    """
+    m = re.match(
+        rf"(?i)^(?P<user>.+?)\s*{_PASS_LABEL}\s*(?:{_VALUE_SEP})?\s*(?P<pwd>.+)$",
+        inline,
+    )
+    if not m:
+        return None
+    user, pwd = _clean_value(m.group("user")), _clean_value(m.group("pwd"))
+    if not user or not pwd:
+        return None
+    # 整段仍是标签本身则放弃
+    if re.fullmatch(rf"(?i){_USER_LABEL}", user) or re.fullmatch(rf"(?i){_PASS_LABEL}", pwd):
+        return None
+    # 去掉账号侧残留的用户标签前缀：账号 138xxxx
+    m_user = re.match(
+        rf"(?i)^(?:{_BRACKET_OPEN})?{_USER_LABEL}(?:{_BRACKET_CLOSE})?\s*(?:{_VALUE_SEP})?\s*(.+)$",
+        user,
+    )
+    if m_user:
+        user = _clean_value(m_user.group(1))
+    if not user or not pwd:
+        return None
+    return ParsedCredentials(user, pwd)
+
+
 def parse_combined_credentials(text: str) -> ParsedCredentials:
     """Return (username, password) parsed from one combined string."""
     if not text or not str(text).strip():
@@ -178,6 +208,7 @@ def parse_combined_credentials(text: str) -> ParsedCredentials:
         lambda: _try_labeled_pair(inline),
         lambda: _try_multiline_labeled(raw),
         lambda: _try_kv_pairs(inline),
+        lambda: _try_trailing_password_label(inline),
     ):
         result = fn()
         if result:
@@ -227,6 +258,11 @@ if __name__ == "__main__":
         ("user/pass", "user", "pass"),
         ("帐号：test  帐户密码：pwd", "test", "pwd"),
         ("工号 E001 密码 pass99", "E001", "pass99"),
+        ("18145043710密码：Hyz123456", "18145043710", "Hyz123456"),
+        ("18111012852  密码Zheng1100", "18111012852", "Zheng1100"),
+        ("15281090940  密码：Hjlys@911020", "15281090940", "Hjlys@911020"),
+        ("18145043710 密码：Hyz123456", "18145043710", "Hyz123456"),
+        ("账号 15282201901 密码 Zjl871118.", "15282201901", "Zjl871118."),
     ]
     ok = fail = 0
     for s, eu, ep in _cases:
